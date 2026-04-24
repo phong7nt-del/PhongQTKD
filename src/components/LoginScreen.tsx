@@ -47,14 +47,19 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   }
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="bg-[#00529C] px-6 py-4 flex items-center justify-center">
-          <LogIn className="w-6 h-6 text-white mr-2" />
-          <h2 className="text-xl font-bold text-white tracking-wide">ĐĂNG NHẬP HỆ THỐNG</h2>
-        </div>
+    <div className="flex-1 flex items-center justify-center p-4 bg-slate-50">
+      <div className="w-full max-w-sm">
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white mb-6 shadow-sm">
+            <LogIn className="h-8 w-8" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-blue-900 tracking-tight">HỆ THỐNG THI THỬ</h2>
+          <p className="text-slate-500 text-sm mt-2">Vui lòng đăng nhập để tiếp tục</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           {error && (
             <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200 text-center">
               {error}
@@ -62,35 +67,35 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Mã Nhân Viên
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserCircle className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <UserCircle className="h-5 w-5 text-slate-400" />
               </div>
               <input
                 type="text"
                 value={empId}
                 onChange={(e) => setEmpId(e.target.value)}
-                className="pl-10 w-full border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Nhập mã nhân viên..."
+                className="pl-11 w-full border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-800 font-medium focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all bg-slate-50 hover:bg-slate-100 focus:bg-white"
+                placeholder="Ví dụ: PA120..."
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Chọn Tổ
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+              Tổ Công Tác
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Users className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Users className="h-5 w-5 text-slate-400" />
               </div>
               <select
                 value={team}
                 onChange={(e) => setTeam(e.target.value)}
-                className="pl-10 w-full border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all"
+                className="pl-11 w-full border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-800 font-medium focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 appearance-none transition-all bg-slate-50 hover:bg-slate-100 focus:bg-white"
               >
                 {teams.map((t) => (
                   <option key={t} value={t}>
@@ -104,26 +109,29 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             </div>
           </div>
 
-          <div className="flex items-center mt-4">
-            <input
-              id="shuffle-answers"
-              type="checkbox"
-              checked={shuffleAnswers}
-              onChange={(e) => setShuffleAnswers(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="shuffle-answers" className="ml-2 block text-sm text-gray-700">
-              Đảo tùy chọn câu trả lời (Áp dụng cho học bài & thi thử)
+          <div className="flex items-start mt-4">
+            <div className="flex items-center h-5">
+              <input
+                id="shuffle-answers"
+                type="checkbox"
+                checked={shuffleAnswers}
+                onChange={(e) => setShuffleAnswers(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+              />
+            </div>
+            <label htmlFor="shuffle-answers" className="ml-2 block text-sm text-slate-700 leading-tight">
+              Đảo tùy chọn câu trả lời<br/><span className="text-xs text-slate-500">(Áp dụng cho học bài & thi thử)</span>
             </label>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#00529C] hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-200 transform hover:-translate-y-0.5"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-blue-200 transition duration-200 uppercase tracking-wider text-sm mt-4"
           >
             Đăng Nhập
           </button>
         </form>
+        </div>
       </div>
     </div>
   );

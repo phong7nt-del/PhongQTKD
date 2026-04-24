@@ -37,42 +37,41 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col w-full max-w-6xl mx-auto py-2 px-4 overflow-hidden h-full">
-      <div className="w-full flex justify-between items-center mb-2 shrink-0">
-         <div className="text-gray-700 bg-white px-3 py-1.5 rounded-md shadow-sm border border-gray-100 font-medium text-sm">
-           Chào <span className="text-blue-700 font-bold">{user.empId}</span> | Tổ: <span className="text-blue-700 font-bold">{user.team}</span>
-         </div>
-         <button 
-           onClick={onLogout}
-           className="flex items-center text-red-600 hover:bg-red-50 px-2 py-1 rounded transition text-sm"
+    <div className="flex-1 min-h-0 flex flex-col w-full bg-slate-50 overflow-hidden">
+      
+      {/* MAIN NAVIGATION TABS */}
+      <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 shrink-0 flex gap-6 sm:gap-8 overflow-x-auto no-scrollbar">
+         <button
+           className={`py-4 text-sm uppercase tracking-wide border-b-2 whitespace-nowrap transition-colors ${activeTab === 'exam' ? 'font-bold text-blue-600 border-blue-600' : 'font-semibold text-slate-400 border-transparent hover:text-slate-600'}`}
+           onClick={() => setActiveTab('exam')}
          >
-           <LogOut className="w-4 h-4 mr-1" />
-           Đăng Xuất
+           THI THỬ
          </button>
-      </div>
+         <button
+           className={`py-4 text-sm uppercase tracking-wide border-b-2 whitespace-nowrap transition-colors ${activeTab === 'study' ? 'font-bold text-blue-600 border-blue-600' : 'font-semibold text-slate-400 border-transparent hover:text-slate-600'}`}
+           onClick={() => setActiveTab('study')}
+         >
+           HỌC BÀI
+         </button>
+      </nav>
 
-      {/* Tabs */}
-      <div className="w-full flex justify-center mb-2 shrink-0">
-        <div className="bg-white p-0.5 rounded-lg shadow-sm border border-gray-200 inline-flex">
-           <button
-             className={`flex items-center px-4 py-1.5 rounded-md font-semibold text-sm transition-colors ${activeTab === 'exam' ? 'bg-[#00529C] text-white shadow' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'}`}
-             onClick={() => setActiveTab('exam')}
-           >
-             <CheckSquare className="w-4 h-4 mr-2" /> 
-             Thi Thử
-           </button>
-           <button
-             className={`flex items-center px-4 py-1.5 rounded-md font-semibold text-sm transition-colors ${activeTab === 'study' ? 'bg-[#00529C] text-white shadow' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'}`}
-             onClick={() => setActiveTab('study')}
-           >
-             <BookOpen className="w-4 h-4 mr-2" /> 
-             Học Bài
-           </button>
+      {/* User Status Bar */}
+      <div className="w-full flex justify-between items-center py-2 px-4 sm:px-6 bg-slate-50 border-b border-slate-200 shrink-0">
+         <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">NV</div>
+          <div className="text-xs font-medium">
+            <p className="text-slate-800 uppercase">{user.empId}</p>
+            <p className="text-slate-500">Tổ: {user.team}</p>
+          </div>
         </div>
+        <button onClick={onLogout} className="flex items-center text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded transition text-xs sm:text-sm font-medium">
+          <LogOut className="w-4 h-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">Đăng Xuất</span>
+        </button>
       </div>
 
       {/* Tab Content */}
-      <div className="w-full flex-1 min-h-0 flex flex-col bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="w-full flex-1 min-h-0 flex flex-col p-2 sm:p-4 lg:p-6 overflow-hidden">
         {activeTab === 'study' && <StudyScreen allSubjects={subjectsInfo.allSubjects} shuffleAnswers={user.shuffleAnswers} />}
         {activeTab === 'exam' && <ExamScreen teamSubjects={subjectsInfo.mySubjects} shuffleAnswers={user.shuffleAnswers} />}
       </div>

@@ -86,31 +86,31 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
 
   if (teamSubjects.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="w-16 h-16 text-yellow-500 mb-4" />
-        <h3 className="text-xl font-bold text-gray-800 mb-2">Tổ của bạn chưa được phân công môn thi nào</h3>
-        <p className="text-gray-600">Vui lòng liên hệ quản trị viên để kiểm tra lại sheet "cơ cấu".</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-white rounded-xl shadow-sm border border-slate-200">
+        <AlertCircle className="w-16 h-16 text-slate-300 mb-4" />
+        <h3 className="text-xl font-bold text-slate-800 mb-2">Tổ của bạn chưa được phân công môn thi nào</h3>
+        <p className="text-slate-500">Vui lòng liên hệ quản trị viên để kiểm tra lại sheet "cơ cấu".</p>
       </div>
     );
   }
 
   if (examState === 'idle') {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <FileText className="w-16 h-16 text-blue-500 mb-6" />
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Tạo Bài Thi Thử</h2>
-        <p className="text-gray-600 mb-8 max-w-md text-center">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+        <FileText className="w-16 h-16 text-blue-100 mb-6" />
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Tạo Bài Thi Thử</h2>
+        <p className="text-slate-500 mb-8 max-w-md text-center text-sm leading-relaxed">
           Hệ thống sẽ lấy ngẫu nhiên các câu hỏi từ {teamSubjects.length} phần thi tương ứng với tổ của bạn theo đúng tỷ lệ cơ cấu.
         </p>
 
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 w-full max-w-sm mb-6">
-           <label className="block text-sm font-semibold text-gray-700 mb-3">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 w-full max-w-sm mb-6">
+           <label className="block text-sm font-semibold text-slate-700 mb-3">
              Chọn số lượng câu hỏi:
            </label>
            <select 
              value={examSize} 
              onChange={e => setExamSize(Number(e.target.value))}
-             className="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+             className="w-full border border-slate-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-700 bg-white shadow-sm"
            >
              <option value={10}>10 câu</option>
              <option value={20}>20 câu</option>
@@ -121,9 +121,9 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
 
         <button
           onClick={startExam}
-          className="bg-[#00529C] hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1 flex items-center"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded shadow-md shadow-blue-200 transition-colors uppercase tracking-wider text-sm flex items-center"
         >
-          <Play className="w-5 h-5 mr-2" /> Bắt Đầu Thi
+          <Play className="w-4 h-4 mr-2" /> Bắt Đầu Thi
         </button>
       </div>
     );
@@ -214,26 +214,26 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
   };
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-gray-50/50 relative overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
        {/* Fixed Header */}
-       <div className="bg-white border-b z-20 flex flex-col sm:flex-row px-4 py-2 gap-2 sm:gap-4 justify-between items-center shadow-md shrink-0">
+       <div className="bg-slate-50 border-b border-slate-200 z-20 flex flex-col sm:flex-row px-4 py-3 gap-3 justify-between items-center shrink-0">
           
           {/* Left: Progress */}
           <div className="flex-1 flex justify-start w-full sm:w-auto order-2 sm:order-1">
-             <div className="font-semibold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 text-center w-full sm:w-auto text-sm sm:text-base">
-                Đã làm: <span className="text-blue-600 font-bold ml-1">{Object.keys(userAnswers).length}</span> / {examQuestions.length}
+             <div className="text-sm font-bold text-slate-400 uppercase tracking-tighter bg-white px-4 py-2 rounded border border-slate-200 w-full sm:w-auto text-center">
+                Đã làm: <span className="text-blue-600 ml-1">{Object.keys(userAnswers).length}</span> / {examQuestions.length}
              </div>
           </div>
 
           {/* Center: Animated Clock */}
           <div className="flex-1 flex justify-center w-full sm:w-auto order-1 sm:order-2">
-             <div className={`px-4 py-1.5 rounded-full shadow-inner flex items-center justify-center gap-2 border-2 transition-all duration-300 w-full sm:w-auto ${
+             <div className={`px-5 py-2 rounded flex items-center justify-center gap-2 border-2 transition-all duration-300 w-full sm:w-auto ${
                 timeLeft < 60 
                   ? 'bg-red-50 border-red-500 text-red-600 animate-pulse' 
-                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-400 text-blue-800'
+                  : 'bg-white border-blue-200 text-slate-800'
              }`}>
-                <Clock className={`w-5 h-5 ${timeLeft < 60 ? 'animate-bounce text-red-600' : 'animate-[spin_4s_linear_infinite] text-blue-600'}`} />
-                <span className="text-xl font-mono font-bold tracking-wider">
+                <Clock className={`w-4 h-4 ${timeLeft < 60 ? 'animate-bounce text-red-600' : 'animate-[spin_4s_linear_infinite] text-blue-400'}`} />
+                <span className="text-lg font-mono font-bold tracking-wider">
                   {formatTime(timeLeft)}
                </span>
              </div>
@@ -243,7 +243,7 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
           <div className="flex-1 flex justify-end w-full sm:w-auto order-3">
              <button 
                 onClick={handleFinish}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-6 rounded-lg shadow transition transform hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded uppercase tracking-wider transition shadow-sm w-full sm:w-auto text-sm"
              >
                 Nộp Bài
              </button>
@@ -251,31 +251,33 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
        </div>
 
        {/* Scrollable Questions Area */}
-       <div className="flex-1 p-3 sm:p-4 overflow-y-auto">
-          <div className="max-w-3xl mx-auto space-y-4 pb-6">
+       <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-white">
+          <div className="max-w-3xl mx-auto space-y-8 pb-10">
              {examQuestions.map((q, qIdx) => (
-               <div key={qIdx} id={`q-${qIdx}`} className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
-                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 leading-relaxed">
-                     <span className="font-bold text-blue-700 mr-2">Câu {qIdx + 1}.</span> 
+               <div key={qIdx} id={`q-${qIdx}`}>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 leading-snug mb-5">
+                     <span className="font-bold text-blue-600 mr-2">Câu {qIdx + 1}.</span> 
                      {q.text}
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                      {q.options.map((opt, oIdx) => {
                         const isSelected = userAnswers[qIdx] === oIdx;
                         return (
-                          <label key={oIdx} className={`flex items-start p-3 rounded-lg border cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                             <div className="flex items-center h-5">
-                               <input 
-                                 type="radio" 
-                                 name={`q-${qIdx}`}
-                                 className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                 checked={isSelected}
-                                 onChange={() => setUserAnswers(prev => ({...prev, [qIdx]: oIdx}))}
-                               />
+                          <label key={oIdx} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all group ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-400'}`}>
+                             <div className={`w-8 h-8 rounded-full border flex shrink-0 items-center justify-center transition-colors font-medium text-sm mr-3 ${isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-100'}`}>
+                               {String.fromCharCode(65 + oIdx)}
                              </div>
-                             <div className="ml-3 text-gray-700 leading-tight">
+                             <div className={`font-medium leading-tight ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>
                                {opt.text}
                              </div>
+                             {/* Hide actual radio input for minimalism */}
+                             <input 
+                               type="radio" 
+                               name={`q-${qIdx}`}
+                               className="sr-only"
+                               checked={isSelected}
+                               onChange={() => setUserAnswers(prev => ({...prev, [qIdx]: oIdx}))}
+                             />
                           </label>
                         )
                      })}
