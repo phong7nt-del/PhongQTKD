@@ -79,7 +79,9 @@ export async function getStructure() {
     "Tổn thất &HSKV",
     "Tiết kiệm điện &NLTT",
     "Giá điện",
-    "Thị trường điện &DPPA"
+    "Thị trường điện &DPPA",
+    "VHDN",
+    "ATTT"
   ];
   
   const fuzzyMatchSheetName = (text: string) => {

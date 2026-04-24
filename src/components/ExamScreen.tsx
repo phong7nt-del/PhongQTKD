@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getQuestions, type Question } from '../lib/dataService';
-import { Play, CheckCircle2, XCircle, FileText, AlertCircle } from 'lucide-react';
+import { Play, CheckCircle2, XCircle, FileText, AlertCircle, Clock } from 'lucide-react';
 
 interface ExamScreenProps {
   teamSubjects: string[];
@@ -13,6 +13,20 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
   const [examQuestions, setExamQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [examSize, setExamSize] = useState<number>(20);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (examState === 'testing' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (examState === 'testing' && timeLeft === 0) {
+      alert('Hết giờ! Bài thi của bạn sẽ được nộp tự động.');
+      setExamState('result');
+    }
+    return () => clearInterval(timer);
+  }, [examState, timeLeft]);
 
   const startExam = async () => {
     if (teamSubjects.length === 0) return;
@@ -47,6 +61,7 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
       
       setExamQuestions(selected);
       setUserAnswers({});
+      setTimeLeft(examSize * 60); // 1 minute per question
       setExamState('testing');
       
     } catch (err) {
@@ -186,11 +201,23 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
   }
 
   // testing state
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-gray-50/50">
-       <div className="p-4 bg-white border-b sticky top-0 z-10 flex justify-between items-center shadow-sm">
-          <div className="font-semibold text-gray-700">
-             Đã làm: <span className="text-blue-600 text-lg">{Object.keys(userAnswers).length}</span> / {examQuestions.length}
+       <div className="p-4 bg-white border-b sticky top-0 z-10 flex flex-wrap gap-4 justify-between items-center shadow-sm">
+          <div className="flex items-center gap-6">
+            <div className="font-semibold text-gray-700">
+               Đã làm: <span className="text-blue-600 text-lg">{Object.keys(userAnswers).length}</span> / {examQuestions.length}
+            </div>
+            <div className={`flex items-center font-bold text-lg ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-gray-800'}`}>
+               <Clock className="w-5 h-5 mr-2" />
+               {formatTime(timeLeft)}
+            </div>
           </div>
           <button 
              onClick={handleFinish}
