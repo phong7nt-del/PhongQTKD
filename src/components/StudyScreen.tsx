@@ -4,9 +4,10 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CheckCircle2, X
 
 interface StudyScreenProps {
   allSubjects: string[];
+  shuffleAnswers?: boolean;
 }
 
-export function StudyScreen({ allSubjects }: StudyScreenProps) {
+export function StudyScreen({ allSubjects, shuffleAnswers }: StudyScreenProps) {
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,11 @@ export function StudyScreen({ allSubjects }: StudyScreenProps) {
     setLoading(true);
     getQuestions(selectedSubject)
       .then((qs) => {
+        if (shuffleAnswers) {
+          qs.forEach(q => {
+            q.options = [...q.options].sort(() => Math.random() - 0.5);
+          });
+        }
         setQuestions(qs);
         setCurrentIndex(0);
         setSelectedAnswerIndices({});

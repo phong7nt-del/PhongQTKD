@@ -4,11 +4,12 @@ import { Play, CheckCircle2, XCircle, FileText, AlertCircle, Clock } from 'lucid
 
 interface ExamScreenProps {
   teamSubjects: string[];
+  shuffleAnswers?: boolean;
 }
 
 type ExamState = 'idle' | 'loading' | 'testing' | 'result';
 
-export function ExamScreen({ teamSubjects }: ExamScreenProps) {
+export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
   const [examState, setExamState] = useState<ExamState>('idle');
   const [examQuestions, setExamQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
@@ -44,6 +45,11 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
       const remaining: Question[] = [];
       
       allSubjectQs.forEach((qs) => {
+         if (shuffleAnswers) {
+           qs.forEach(q => {
+             q.options = [...q.options].sort(() => Math.random() - 0.5);
+           });
+         }
          // shuffle qs
          const shuffled = [...qs].sort(() => 0.5 - Math.random());
          selected.push(...shuffled.slice(0, qPerSubject));

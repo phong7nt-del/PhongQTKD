@@ -11,6 +11,7 @@ import { MainScreen } from './components/MainScreen';
 export type User = {
   empId: string;
   team: string;
+  shuffleAnswers: boolean;
 };
 
 export default function App() {

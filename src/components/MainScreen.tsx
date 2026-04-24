@@ -73,8 +73,8 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
 
       {/* Tab Content */}
       <div className="w-full flex-1 min-h-0 flex flex-col bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        {activeTab === 'study' && <StudyScreen allSubjects={subjectsInfo.allSubjects} />}
-        {activeTab === 'exam' && <ExamScreen teamSubjects={subjectsInfo.mySubjects} />}
+        {activeTab === 'study' && <StudyScreen allSubjects={subjectsInfo.allSubjects} shuffleAnswers={user.shuffleAnswers} />}
+        {activeTab === 'exam' && <ExamScreen teamSubjects={subjectsInfo.mySubjects} shuffleAnswers={user.shuffleAnswers} />}
       </div>
     </div>
   );
