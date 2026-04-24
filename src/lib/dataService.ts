@@ -18,7 +18,7 @@ export interface Answer {
 }
 
 export async function fetchCsv(sheetName: string): Promise<string> {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=0&sheet=${encodeURIComponent(sheetName)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch sheet ${sheetName}`);
   return await res.text();
@@ -103,17 +103,30 @@ export async function getQuestions(sheetName: string): Promise<Question[]> {
   const parsed = Papa.parse<string[]>(csv);
   const data = parsed.data;
   
+  if (!data || data.length === 0) return [];
+
+  const headerRow = data[0].map(h => h?.trim().toUpperCase() || '');
+    
+  let typeCol = headerRow.findIndex(h => h.includes('PHÂN LOẠI'));
+  let textCol = headerRow.findIndex(h => h.includes('CÂU HỎI'));
+  let ansCol = headerRow.findIndex(h => h.includes('ĐÁP ÁN'));
+
+  // Fallbacks if header is unexpectedly empty or not found
+  if (typeCol === -1) typeCol = 1;
+  if (textCol === -1) textCol = 2;
+  if (ansCol === -1) ansCol = 3;
+  
   const questions: Question[] = [];
   let currentQuestion: Question | null = null;
   
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    if (!row || row.length < 3) continue;
+    if (!row || row.length <= typeCol) continue;
     
-    const type = row[1]?.trim().toUpperCase();
-    const text = row[2]?.trim();
+    const type = row[typeCol]?.trim().toUpperCase();
+    const text = row[textCol]?.trim();
     // In google sheets some marks may be "x" or with spaces
-    const isCorrect = row[3]?.trim().toUpperCase() === 'X';
+    const isCorrect = row[ansCol]?.trim().toUpperCase() === 'X';
     
     if (type === 'Q') {
       if (currentQuestion) {

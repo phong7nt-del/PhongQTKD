@@ -37,8 +37,8 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center w-full max-w-6xl mx-auto py-6 px-4">
-      <div className="w-full flex justify-between items-center mb-6">
+    <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto py-4 px-4 overflow-hidden h-full">
+      <div className="w-full flex justify-between items-center mb-4 shrink-0">
          <div className="text-gray-700 bg-white px-4 py-2 rounded-md shadow-sm border border-gray-100 font-medium">
            Chào <span className="text-blue-700 font-bold">{user.empId}</span> | Tổ: <span className="text-blue-700 font-bold">{user.team}</span>
          </div>
@@ -52,7 +52,7 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
       </div>
 
       {/* Tabs */}
-      <div className="w-full flex justify-center mb-8">
+      <div className="w-full flex justify-center mb-4 shrink-0">
         <div className="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
            <button
              className={`flex items-center px-6 py-2.5 rounded-md font-semibold text-sm sm:text-base transition-colors ${activeTab === 'exam' ? 'bg-[#00529C] text-white shadow' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'}`}
@@ -72,7 +72,7 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="w-full flex-1 flex flex-col bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="w-full flex-1 min-h-0 flex flex-col bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         {activeTab === 'study' && <StudyScreen allSubjects={subjectsInfo.allSubjects} />}
         {activeTab === 'exam' && <ExamScreen teamSubjects={subjectsInfo.mySubjects} />}
       </div>
