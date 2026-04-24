@@ -19,9 +19,9 @@ export default function App() {
   return (
     <div className="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <header className="bg-[#00529C] text-white py-3 px-4 shadow-md flex items-center justify-between shrink-0">
+      <header className="bg-[#00529C] text-white py-1.5 px-4 shadow-md flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-3 w-1/4">
-           <Zap className="w-8 h-8 text-yellow-400" />
+           <Zap className="w-6 h-6 text-yellow-400" />
            <div className="font-semibold text-sm sm:text-base leading-tight">
              Công ty Điện lực<br/>Vũng Tàu
            </div>

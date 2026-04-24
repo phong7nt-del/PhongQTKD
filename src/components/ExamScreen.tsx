@@ -210,26 +210,26 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-gray-50/50 relative overflow-hidden">
        {/* Fixed Header */}
-       <div className="bg-white border-b z-20 flex flex-col sm:flex-row px-4 py-3 gap-4 justify-between items-center shadow-md shrink-0">
+       <div className="bg-white border-b z-20 flex flex-col sm:flex-row px-4 py-2 gap-2 sm:gap-4 justify-between items-center shadow-md shrink-0">
           
           {/* Left: Progress */}
           <div className="flex-1 flex justify-start w-full sm:w-auto order-2 sm:order-1">
-             <div className="font-semibold text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200 text-center w-full sm:w-auto">
+             <div className="font-semibold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 text-center w-full sm:w-auto text-sm sm:text-base">
                 Đã làm: <span className="text-blue-600 font-bold ml-1">{Object.keys(userAnswers).length}</span> / {examQuestions.length}
              </div>
           </div>
 
           {/* Center: Animated Clock */}
           <div className="flex-1 flex justify-center w-full sm:w-auto order-1 sm:order-2">
-             <div className={`px-6 py-2 rounded-full shadow-inner flex items-center justify-center gap-3 border-2 transition-all duration-300 w-full sm:w-auto ${
+             <div className={`px-4 py-1.5 rounded-full shadow-inner flex items-center justify-center gap-2 border-2 transition-all duration-300 w-full sm:w-auto ${
                 timeLeft < 60 
                   ? 'bg-red-50 border-red-500 text-red-600 animate-pulse' 
                   : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-400 text-blue-800'
              }`}>
-                <Clock className={`w-6 h-6 ${timeLeft < 60 ? 'animate-bounce text-red-600' : 'animate-[spin_4s_linear_infinite] text-blue-600'}`} />
-                <span className="text-2xl font-mono font-bold tracking-wider">
+                <Clock className={`w-5 h-5 ${timeLeft < 60 ? 'animate-bounce text-red-600' : 'animate-[spin_4s_linear_infinite] text-blue-600'}`} />
+                <span className="text-xl font-mono font-bold tracking-wider">
                   {formatTime(timeLeft)}
-                </span>
+               </span>
              </div>
           </div>
 
@@ -237,7 +237,7 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
           <div className="flex-1 flex justify-end w-full sm:w-auto order-3">
              <button 
                 onClick={handleFinish}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-8 rounded-lg shadow transition transform hover:-translate-y-0.5 w-full sm:w-auto"
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-6 rounded-lg shadow transition transform hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
              >
                 Nộp Bài
              </button>
@@ -245,19 +245,19 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
        </div>
 
        {/* Scrollable Questions Area */}
-       <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-          <div className="max-w-3xl mx-auto space-y-8 pb-10">
+       <div className="flex-1 p-3 sm:p-4 overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-4 pb-6">
              {examQuestions.map((q, qIdx) => (
-               <div key={qIdx} id={`q-${qIdx}`} className="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-gray-100">
-                  <h3 className="text-lg font-medium text-gray-900 mb-5 leading-relaxed">
+               <div key={qIdx} id={`q-${qIdx}`} className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 leading-relaxed">
                      <span className="font-bold text-blue-700 mr-2">Câu {qIdx + 1}.</span> 
                      {q.text}
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                      {q.options.map((opt, oIdx) => {
                         const isSelected = userAnswers[qIdx] === oIdx;
                         return (
-                          <label key={oIdx} className={`flex items-start p-4 rounded-lg border cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                          <label key={oIdx} className={`flex items-start p-3 rounded-lg border cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                              <div className="flex items-center h-5">
                                <input 
                                  type="radio" 
