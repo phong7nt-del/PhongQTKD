@@ -17,7 +17,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       {/* Header */}
       <header className="bg-[#00529C] text-white py-3 px-4 shadow-md flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-3 w-1/4">

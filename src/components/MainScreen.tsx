@@ -37,7 +37,7 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto py-4 px-4 overflow-hidden h-full">
+    <div className="flex-1 min-h-0 flex flex-col w-full max-w-6xl mx-auto py-4 px-4 overflow-hidden h-full">
       <div className="w-full flex justify-between items-center mb-4 shrink-0">
          <div className="text-gray-700 bg-white px-4 py-2 rounded-md shadow-sm border border-gray-100 font-medium">
            Chào <span className="text-blue-700 font-bold">{user.empId}</span> | Tổ: <span className="text-blue-700 font-bold">{user.team}</span>

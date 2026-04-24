@@ -208,7 +208,7 @@ export function ExamScreen({ teamSubjects }: ExamScreenProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50/50 relative overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col bg-gray-50/50 relative overflow-hidden">
        {/* Fixed Header */}
        <div className="bg-white border-b z-20 flex flex-col sm:flex-row px-4 py-3 gap-4 justify-between items-center shadow-md shrink-0">
           
