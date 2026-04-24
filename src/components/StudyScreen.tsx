@@ -40,55 +40,96 @@ export function StudyScreen({ allSubjects }: StudyScreenProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white relative">
-      <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-         <h2 className="text-xl font-bold text-gray-800">Góc Học Tập</h2>
-         <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            className="border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto min-w-[250px]"
-         >
-            <option value="">-- Chọn môn học --</option>
-            {allSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-         </select>
+    <div className="flex flex-col h-full bg-white relative overflow-hidden">
+      {/* Header with Navigation */}
+      <div className="p-3 sm:p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-3 shrink-0 z-10">
+         <div className="flex items-center gap-3 w-full md:w-auto">
+           <h2 className="text-lg font-bold text-gray-800 hidden lg:block shrink-0">Góc Học Tập</h2>
+           <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto min-w-[200px]"
+           >
+              <option value="">-- Chọn môn học --</option>
+              {allSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+           </select>
+         </div>
+
+         {selectedSubject && !loading && questions.length > 0 && (
+           <div className="flex items-center justify-between sm:justify-end w-full md:w-auto gap-1 sm:gap-2">
+             <button
+               onClick={() => setCurrentIndex(0)}
+               disabled={currentIndex === 0}
+               className="p-1.5 sm:px-3 sm:py-1.5 text-gray-600 hover:bg-gray-200 rounded disabled:opacity-30 disabled:hover:bg-transparent flex items-center transition"
+               title="Về đầu"
+             >
+               <ChevronsLeft className="w-5 h-5" />
+             </button>
+             
+             <button
+               onClick={() => setCurrentIndex(c => Math.max(0, c - 1))}
+               disabled={currentIndex === 0}
+               className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded shadow-sm disabled:opacity-50 flex items-center font-medium transition text-sm sm:text-base"
+             >
+               <ChevronLeft className="w-4 h-4 mr-1" /> Trước
+             </button>
+
+             <span className="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full whitespace-nowrap">
+               {currentIndex + 1} / {questions.length}
+             </span>
+
+             <button
+               onClick={() => setCurrentIndex(c => Math.min(questions.length - 1, c + 1))}
+               disabled={currentIndex === questions.length - 1}
+               className="px-3 py-1.5 bg-[#00529C] text-white hover:bg-blue-700 rounded shadow-sm disabled:opacity-50 flex items-center font-medium transition text-sm sm:text-base"
+             >
+               Sau <ChevronRight className="w-4 h-4 ml-1" />
+             </button>
+
+             <button
+               onClick={() => setCurrentIndex(questions.length - 1)}
+               disabled={currentIndex === questions.length - 1}
+               className="p-1.5 sm:px-3 sm:py-1.5 text-gray-600 hover:bg-gray-200 rounded disabled:opacity-30 disabled:hover:bg-transparent flex items-center transition"
+               title="Về cuối"
+             >
+               <ChevronsRight className="w-5 h-5" />
+             </button>
+           </div>
+         )}
       </div>
 
-      <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto">
+      <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-4 overflow-y-auto">
          {!selectedSubject ? (
             <div className="m-auto text-gray-400 text-center flex flex-col items-center">
-               <BookOpenIcon className="w-16 h-16 mb-4 text-gray-300" />
-               <p className="text-lg">Vui lòng chọn môn học để bắt đầu</p>
+               <BookOpenIcon className="w-12 h-12 mb-3 text-gray-300" />
+               <p className="text-base">Vui lòng chọn môn học để bắt đầu</p>
             </div>
          ) : loading ? (
             <div className="m-auto flex flex-col items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600 mb-3"></div>
               <p className="text-gray-500">Đang tải dữ liệu...</p>
             </div>
          ) : questions.length === 0 ? (
             <div className="m-auto text-gray-500">Chưa có câu hỏi cho môn học này.</div>
          ) : (
-            <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
-               <div className="flex justify-between items-center mb-6">
-                 <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-                   Câu {currentIndex + 1} / {questions.length}
-                 </span>
-               </div>
+            <div className="w-full max-w-3xl mx-auto flex flex-col pb-8">
                
-               <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 mb-6 shadow-sm">
-                 <h3 className="text-lg sm:text-xl font-medium text-gray-800 leading-relaxed">
+               <div className="bg-blue-50/50 p-4 sm:p-5 rounded-xl border border-blue-100 mb-5 shadow-sm">
+                 <h3 className="text-base sm:text-lg font-medium text-gray-900 leading-relaxed">
+                   <span className="font-bold text-blue-700 mr-2">Câu {currentIndex + 1}.</span>
                    {questions[currentIndex].text}
                  </h3>
                </div>
 
-               <div className="space-y-3 mb-8 flex-1">
+               <div className="space-y-2.5">
                  {questions[currentIndex].options.map((opt, idx) => {
                     const isSelected = selectedAnswerIndices[currentIndex] === idx;
                     const hasAnswered = selectedAnswerIndices[currentIndex] !== undefined;
                     
-                    let btnClass = "w-full text-left p-4 rounded-lg border transition-all duration-200 shadow-sm flex items-start gap-3 ";
+                    let btnClass = "w-full text-left p-3 sm:p-4 rounded-lg border transition-all duration-200 shadow-sm flex items-start gap-3 outline-none focus:ring-2 focus:ring-blue-300 ";
                     
                     if (!hasAnswered) {
-                      btnClass += "bg-white border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:shadow";
+                      btnClass += "bg-white border-gray-200 hover:border-blue-400 hover:bg-blue-50";
                     } else {
                       if (opt.isCorrect) {
                          btnClass += "bg-green-50 border-green-500";
@@ -112,51 +153,15 @@ export function StudyScreen({ allSubjects }: StudyScreenProps) {
                             ) : hasAnswered && isSelected && !opt.isCorrect ? (
                               <XCircle className="w-5 h-5 text-red-600" />
                             ) : (
-                              <div className={`w-5 h-5 rounded-full border-2 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`} />
+                              <div className={`w-5 h-5 rounded-full border-2 transition-colors ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`} />
                             )}
                          </div>
-                         <span className={`text-base leading-relaxed ${hasAnswered && opt.isCorrect ? 'text-green-800 font-medium' : hasAnswered && isSelected && !opt.isCorrect ? 'text-red-800 font-medium' : 'text-gray-700'}`}>
+                         <span className={`text-sm sm:text-base leading-relaxed text-left ${hasAnswered && opt.isCorrect ? 'text-green-800 font-medium' : hasAnswered && isSelected && !opt.isCorrect ? 'text-red-800 font-medium' : 'text-gray-700'}`}>
                            {opt.text}
                          </span>
                       </button>
                     )
                  })}
-               </div>
-
-               {/* Navigation */}
-               <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
-                 <button
-                   onClick={() => setCurrentIndex(0)}
-                   disabled={currentIndex === 0}
-                   className="p-2 sm:px-4 sm:py-2 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 flex items-center"
-                 >
-                   <ChevronsLeft className="w-5 h-5 sm:mr-1" /> <span className="hidden sm:inline">Về đầu</span>
-                 </button>
-                 
-                 <div className="flex items-center space-x-2 sm:space-x-4">
-                   <button
-                     onClick={() => setCurrentIndex(c => Math.max(0, c - 1))}
-                     disabled={currentIndex === 0}
-                     className="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded shadow-sm disabled:opacity-50 disabled:shadow-none flex items-center font-medium"
-                   >
-                     <ChevronLeft className="w-5 h-5 mr-1" /> Trước
-                   </button>
-                   <button
-                     onClick={() => setCurrentIndex(c => Math.min(questions.length - 1, c + 1))}
-                     disabled={currentIndex === questions.length - 1}
-                     className="px-4 py-2 bg-[#00529C] text-white hover:bg-blue-700 rounded shadow-sm disabled:opacity-50 disabled:shadow-none flex items-center font-medium"
-                   >
-                     Sau <ChevronRight className="w-5 h-5 ml-1" />
-                   </button>
-                 </div>
-
-                 <button
-                   onClick={() => setCurrentIndex(questions.length - 1)}
-                   disabled={currentIndex === questions.length - 1}
-                   className="p-2 sm:px-4 sm:py-2 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 flex items-center"
-                 >
-                   <span className="hidden sm:inline">Về cuối</span> <ChevronsRight className="w-5 h-5 sm:ml-1" />
-                 </button>
                </div>
             </div>
          )}
