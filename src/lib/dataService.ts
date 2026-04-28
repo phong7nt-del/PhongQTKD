@@ -109,6 +109,44 @@ export function getSafetySubjects(department: string): string[] {
   return allSafetySheets;
 }
 
+export async function getUserInfo(empId: string): Promise<{ fullName?: string; avatarUrl?: string }> {
+  try {
+    const csv = await fetchCsv('CBCNV');
+    const parsed = Papa.parse<string[]>(csv);
+    const data = parsed.data;
+    if (!data || data.length === 0) return {};
+    
+    // Header is usually the first row
+    const headerRow = data[0].map(h => h?.trim().toUpperCase() || '');
+    let empIdCol = headerRow.findIndex(h => h.includes('MSNV') || h.includes('MÃ NHÂN VIÊN'));
+    let nameCol = headerRow.findIndex(h => h.includes('HỌ VÀ TÊN') || h.includes('TÊN'));
+    let linkCol = headerRow.findIndex(h => h.includes('LINK ẢNH') || h.includes('ẢNH'));
+    
+    // Fallbacks
+    if (empIdCol === -1) empIdCol = 1;
+    if (linkCol === -1) linkCol = 2;
+    if (nameCol === -1) nameCol = 3;
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (!row || row.length <= empIdCol) continue;
+      const rowEmpId = row[empIdCol]?.trim();
+      if (rowEmpId && rowEmpId.toUpperCase() === empId.toUpperCase()) {
+        const link = row[linkCol]?.trim();
+        // Ignore if link is just an image name like "BGĐ-04.jpg" without http
+        const avatarUrl = link && link.startsWith('http') ? link : undefined;
+        return {
+          fullName: row[nameCol]?.trim(),
+          avatarUrl
+        };
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching CBCNV:', err);
+  }
+  return {};
+}
+
 export async function getQuestions(sheetName: string): Promise<Question[]> {
   const csv = await fetchCsv(sheetName);
   const parsed = Papa.parse<string[]>(csv);

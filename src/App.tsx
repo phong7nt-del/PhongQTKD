@@ -13,6 +13,8 @@ export type User = {
   team: string; // for QTKD
   department: string; // for QT An Toan
   shuffleAnswers: boolean;
+  avatarUrl?: string;
+  fullName?: string;
 };
 
 export default function App() {

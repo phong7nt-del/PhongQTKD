@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getStructure } from '../lib/dataService';
+import { getStructure, getUserInfo } from '../lib/dataService';
 import type { User } from '../App';
 import { LogIn, UserCircle, Users } from 'lucide-react';
 
@@ -16,6 +16,8 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   useEffect(() => {
     getStructure()
       .then((data) => {
@@ -29,14 +31,32 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!empId.trim()) {
       setError('Vui lòng nhập Mã nhân viên');
       return;
     }
+    
+    setIsLoggingIn(true);
     setError('');
-    onLogin({ empId: empId.trim(), team, department, shuffleAnswers });
+    
+    try {
+      const userInfo = await getUserInfo(empId.trim());
+      onLogin({ 
+        empId: empId.trim(), 
+        team, 
+        department, 
+        shuffleAnswers,
+        fullName: userInfo.fullName,
+        avatarUrl: userInfo.avatarUrl
+      });
+    } catch (err) {
+      console.error(err);
+      onLogin({ empId: empId.trim(), team, department, shuffleAnswers });
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   if (loading) {
@@ -165,9 +185,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-blue-200 transition duration-200 uppercase tracking-wider text-sm mt-4"
+            disabled={isLoggingIn}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-blue-200 transition duration-200 uppercase tracking-wider text-sm mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Đăng Nhập
+            {isLoggingIn ? 'Đang Đăng Nhập...' : 'Đăng Nhập'}
           </button>
         </form>
         </div>

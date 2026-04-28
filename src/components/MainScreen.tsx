@@ -74,16 +74,21 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
         <div className="mt-auto p-4 bg-slate-50 border-t border-slate-200 w-64">
            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">NV</div>
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-slate-700 shrink-0">NV</div>
+                )}
                 <div className="text-xs font-medium">
-                  <p className="text-slate-800 uppercase line-clamp-1">{user.empId}</p>
-                  <div className="text-slate-500 text-[10px] sm:text-xs">
+                  <p className="text-slate-800 uppercase line-clamp-1 font-bold">{user.fullName || user.empId}</p>
+                  <p className="text-slate-500 text-[10px] uppercase">{user.fullName ? user.empId : 'Nhân viên'}</p>
+                  <div className="text-slate-500 text-[10px] sm:text-xs mt-1">
                     <div><span className="font-semibold text-slate-600">Khối:</span> {user.department}</div>
                     <div className="truncate w-32" title={user.team}><span className="font-semibold text-slate-600">Tổ:</span> {user.team}</div>
                   </div>
                 </div>
               </div>
-              <button onClick={onLogout} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Đăng xuất">
+              <button onClick={onLogout} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition shrink-0" title="Đăng xuất">
                 <LogOut className="w-4 h-4" />
               </button>
            </div>
