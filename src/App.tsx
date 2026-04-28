@@ -10,7 +10,8 @@ import { MainScreen } from './components/MainScreen';
 
 export type User = {
   empId: string;
-  team: string;
+  team: string; // for QTKD
+  department: string; // for QT An Toan
   shuffleAnswers: boolean;
 };
 
@@ -32,7 +33,7 @@ export default function App() {
         </div>
         
         <div className="flex-1 text-center">
-          <h1 className="text-lg sm:text-xl font-extrabold text-blue-900 tracking-tight">HỆ THỐNG THI THỬ QTKD</h1>
+          <h1 className="text-lg sm:text-xl font-extrabold text-blue-900 tracking-tight">HỆ THỐNG KHẢO THÍ & ĐÀO TẠO</h1>
         </div>
         
         <div className="w-1/4 text-right leading-tight hidden sm:block">

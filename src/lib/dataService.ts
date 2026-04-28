@@ -98,6 +98,17 @@ export async function getStructure() {
   return { subjects: finalSubjects, teams, teamSubjectMap: mapping };
 }
 
+export function getSafetySubjects(department: string): string[] {
+  const allSafetySheets = [
+    "kien thuc chung",
+    "trung the",
+    "ha the",
+    "ho tro",
+    "VH tram"
+  ];
+  return allSafetySheets;
+}
+
 export async function getQuestions(sheetName: string): Promise<Question[]> {
   const csv = await fetchCsv(sheetName);
   const parsed = Papa.parse<string[]>(csv);
