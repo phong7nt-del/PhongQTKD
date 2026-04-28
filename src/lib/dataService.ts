@@ -134,24 +134,25 @@ export async function getQuestions(sheetName: string): Promise<Question[]> {
     const row = data[i];
     if (!row || row.length <= typeCol) continue;
     
-    const type = row[typeCol]?.trim().toUpperCase();
-    const text = row[textCol]?.trim();
+    const rawType = row[typeCol]?.trim().toUpperCase();
+    const rawText = row[textCol]?.trim() || '';
+    
     // In google sheets some marks may be "x" or with spaces
     const isCorrect = row[ansCol]?.trim().toUpperCase() === 'X';
     
-    if (type === 'Q') {
+    if (rawType === 'Q') {
       if (currentQuestion) {
         questions.push(currentQuestion);
       }
       currentQuestion = {
         id: row[0]?.trim() || `q-${i}`,
-        text: text,
+        text: rawText.replace(/^Câu\s*\d+[\.\:\s]*/i, '').trim(),
         options: []
       };
-    } else if (type === 'A') {
-      if (currentQuestion && text) {
+    } else if (rawType === 'A') {
+      if (currentQuestion && rawText) {
         currentQuestion.options.push({
-          text: text,
+          text: rawText.replace(/^[a-z][\.\)\:]+\s*/i, '').trim(),
           isCorrect: isCorrect
         });
       }
