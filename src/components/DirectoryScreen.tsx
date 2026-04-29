@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllEmployees, Employee } from '../lib/dataService';
-import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown, List, Network } from 'lucide-react';
+import { Tree, TreeNode } from 'react-organizational-chart';
 
 interface OrgNode {
   id: string;
@@ -13,6 +14,7 @@ interface OrgNode {
 export function DirectoryScreen() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
 
   useEffect(() => {
     getAllEmployees().then(data => {
@@ -42,10 +44,10 @@ export function DirectoryScreen() {
   const otherBgd = bgd.filter(e => !['002113', '011903', '004123', '012219'].includes(e.empId));
 
   // Map of which deptShort goes to which director
-  const gdDepts = ['TCKT', 'VP', 'KHVT', 'TCNS']; 
+  const gdDepts = ['TCKT', 'VP', 'KHVT', 'TCNS', 'QLĐK']; 
   const pgdKdDepts = ['KD', 'QLTG', 'DVKH', 'QLHTĐĐ', 'QLĐK'];
-  const pgdKtDepts = ['KTAT', 'VHLĐ', 'QLLĐ'];
-  const pgdDtxdDepts = ['QLĐT'];
+  const pgdKtDepts = ['KTAT', 'VHLĐ', 'QLLĐ', 'QLĐK'];
+  const pgdDtxdDepts = ['QLĐT', 'QLĐK'];
 
   const sortEmployees = (arr: Employee[]) => {
     return [...arr].sort((a, b) => {
@@ -150,16 +152,44 @@ export function DirectoryScreen() {
   return (
     <div className="flex-1 w-full bg-slate-50 overflow-y-auto no-scrollbar p-6">
       <div className="max-w-5xl mx-auto space-y-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-extrabold text-blue-900 tracking-tight">SƠ ĐỒ TỔ CHỨC PCVT</h2>
-          <p className="text-slate-500 mt-2">Danh bạ & cây công tác quản trị</p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-extrabold text-blue-900 tracking-tight">SƠ ĐỒ TỔ CHỨC PCVT</h2>
+            <p className="text-slate-500 mt-2">Danh bạ & cây công tác quản trị</p>
+          </div>
+          <div className="flex bg-slate-200 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <List className="w-4 h-4" />
+              Danh sách
+            </button>
+            <button
+              onClick={() => setViewMode('tree')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                viewMode === 'tree' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Network className="w-4 h-4" />
+              Sơ đồ cây
+            </button>
+          </div>
         </div>
         
-        <div className="space-y-6">
-          {tree.map(node => (
-            <OrgTreeNode key={node.id} node={node} level={0} defaultExpanded={true} />
-          ))}
-        </div>
+        {viewMode === 'list' ? (
+          <div className="space-y-6">
+            {tree.map(node => (
+              <OrgTreeNode key={node.id} node={node} level={0} defaultExpanded={true} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white p-8 pb-[300px] rounded-2xl shadow-sm border border-slate-200 overflow-x-auto no-scrollbar">
+             <OrgChart tree={tree} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -261,6 +291,58 @@ const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, 
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+const StyledNode = ({ title, employees, manager }: { title: string, employees: Employee[], manager?: Employee }) => (
+  <div className="inline-flex flex-col items-center mx-2">
+    <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-3 min-w-[220px] max-w-[320px] shadow-sm mb-2 hover:shadow-md transition-shadow">
+      <h4 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2 mb-3 whitespace-normal break-words">{title}</h4>
+      {manager && (
+        <div className="flex flex-col items-center mb-3">
+           <EmployeeCard emp={manager} isManager={true} />
+        </div>
+      )}
+      {employees.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 mt-2">
+          {employees.map(e => <EmployeeCard key={e.empId} emp={e} />)}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const renderTreeNodes = (nodes: OrgNode[]) => {
+  return nodes.map(node => (
+    <TreeNode 
+      key={node.id} 
+      label={<StyledNode title={node.name} manager={node.manager} employees={node.employees} />}
+    >
+      {node.children.length > 0 && renderTreeNodes(node.children)}
+    </TreeNode>
+  ));
+};
+
+const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
+  return (
+    <div className="py-4 min-w-max">
+      <Tree
+        lineWidth={'2px'}
+        lineColor={'#cbd5e1'}
+        lineBorderRadius={'10px'}
+        label={
+          <div className="inline-flex flex-col items-center mb-4">
+            <div className="bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-md border-2 border-blue-700 uppercase tracking-widest text-center">
+              Công ty
+              <br/>
+              Điện lực Vũng Tàu
+            </div>
+          </div>
+        }
+      >
+        {renderTreeNodes(tree)}
+      </Tree>
     </div>
   );
 };
