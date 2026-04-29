@@ -131,7 +131,7 @@ export function StudyScreen({ allSubjects, shuffleAnswers }: StudyScreenProps) {
                     const isSelected = selectedAnswerIndices[currentIndex] === idx;
                     const hasAnswered = selectedAnswerIndices[currentIndex] !== undefined;
                     
-                    let btnClass = "w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 group flex items-center gap-3 focus:outline-none ";
+                    let btnClass = "w-full text-left p-3 sm:p-4 pr-16 sm:pr-20 rounded-lg border-2 transition-all duration-200 group flex items-center gap-3 focus:outline-none relative ";
                     let letterClass = "w-8 h-8 rounded-full border flex shrink-0 items-center justify-center transition-colors font-medium text-sm ";
 
                     if (!hasAnswered) {
@@ -139,10 +139,10 @@ export function StudyScreen({ allSubjects, shuffleAnswers }: StudyScreenProps) {
                       letterClass += "border-slate-300 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-100";
                     } else {
                       if (opt.isCorrect) {
-                         btnClass += "border-blue-500 bg-blue-50 relative";
+                         btnClass += "border-blue-500 bg-blue-50";
                          letterClass += "border-blue-600 bg-blue-600 text-white";
                       } else if (isSelected && !opt.isCorrect) {
-                         btnClass += "border-red-400 bg-red-50 relative opacity-100";
+                         btnClass += "border-red-400 bg-red-50 opacity-100";
                          letterClass += "border-red-500 bg-red-500 text-white";
                       } else {
                          btnClass += "border-slate-200 bg-white opacity-60";

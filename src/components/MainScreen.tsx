@@ -68,7 +68,7 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
               <AlertTriangle className="w-5 h-5 shrink-0" />
               Vi phạm trang bị điện
             </button>
-            {user.empId === '008574' && (
+            {(user.empId === '008574' || user.empId === '008547') && (
               <button 
                 onClick={() => setActiveModule('DIRECTORY')}
                 className={`w-full text-left px-3 py-2.5 rounded-md font-medium text-sm transition-colors flex items-center gap-3 ${activeModule === 'DIRECTORY' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-slate-600 hover:bg-slate-50 border-l-4 border-transparent'}`}

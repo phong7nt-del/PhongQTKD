@@ -274,7 +274,7 @@ export function ExamScreen({ teamSubjects, shuffleAnswers }: ExamScreenProps) {
                              <input 
                                type="radio" 
                                name={`q-${qIdx}`}
-                               className="sr-only"
+                               className="hidden"
                                checked={isSelected}
                                onChange={() => setUserAnswers(prev => ({...prev, [qIdx]: oIdx}))}
                              />

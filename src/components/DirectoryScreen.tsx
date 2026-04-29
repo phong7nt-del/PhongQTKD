@@ -160,16 +160,29 @@ const EmployeeCard = ({ emp, isManager = false }: { emp: Employee, isManager?: b
       </div>
 
       {/* Tooltip Popup */}
-      <div className="absolute top-full mt-2 w-64 bg-slate-800 text-white rounded-xl p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 pointer-events-none">
+      <div className="absolute top-full mt-2 w-[340px] bg-slate-800 text-white rounded-xl p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 pointer-events-none">
         <div className="absolute -top-1 left-1/2 -translate-x-1/2 border-solid border-b-slate-800 border-b-[8px] border-x-transparent border-x-[8px] border-t-0"></div>
-        <p className="font-bold text-base border-b border-slate-700 pb-2 mb-2">{emp.fullName}</p>
-        <div className="space-y-1.5 text-xs text-slate-300">
-          <p><span className="font-semibold text-slate-400">Mã NV:</span> {emp.empId}</p>
-          <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5"/> <span>{emp.dob || '---'}</span></div>
-          <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5"/> <span>{emp.phone || '---'}</span></div>
-          <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5"/> <span>{emp.email || '---'}</span></div>
-          <p className="pt-1 mt-1 border-t border-slate-700 text-yellow-300 font-medium">{emp.dept}</p>
-          {emp.team && emp.team !== emp.dept && <p className="text-slate-400 italic">{emp.team}</p>}
+        <div className="flex items-start gap-4">
+          <div className="shrink-0">
+            {emp.avatarUrl ? (
+              <img src={emp.avatarUrl} alt={emp.fullName} className="w-16 h-16 rounded-lg object-cover border border-slate-600" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="w-16 h-16 rounded-lg bg-slate-700 flex items-center justify-center border border-slate-600">
+                <UserIcon className="w-8 h-8 text-slate-400" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="font-bold text-base border-b border-slate-700 pb-1 mb-1.5 truncate" title={emp.fullName}>{emp.fullName}</p>
+            <div className="space-y-1 text-xs text-slate-300">
+              <p><span className="font-semibold text-slate-400">Mã NV:</span> {emp.empId}</p>
+              <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 shrink-0"/> <span className="truncate">{emp.dob || '---'}</span></div>
+              <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 shrink-0"/> <span className="truncate">{emp.phone || '---'}</span></div>
+              <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 shrink-0"/> <span className="truncate">{emp.email || '---'}</span></div>
+              <p className="pt-1 mt-1 border-t border-slate-700 text-yellow-300 font-medium leading-snug">{emp.dept}</p>
+              {emp.team && emp.team !== emp.dept && <p className="text-slate-400 italic leading-snug">{emp.team}</p>}
+            </div>
+          </div>
         </div>
       </div>
     </div>
