@@ -34,9 +34,9 @@ export function DirectoryScreen() {
   const bgd = employees.filter(e => e.deptShort === 'BGĐ');
 
   const giamDoc = bgd.find(e => e.empId === '002113');
-  const pgdKd = bgd.find(e => e.empId === '011903');
-  const pgdKt = bgd.find(e => e.empId === '004123');
-  const pgdDtxd = bgd.find(e => e.empId === '012219');
+  const pgdKd = bgd.find(e => e.empId === '012219');
+  const pgdKt = bgd.find(e => e.empId === '011903');
+  const pgdDtxd = bgd.find(e => e.empId === '004123');
   
   // Also collect any other BGD members if there are any
   const otherBgd = bgd.filter(e => !['002113', '011903', '004123', '012219'].includes(e.empId));
@@ -181,28 +181,28 @@ const EmployeeCard = ({ emp, isManager = false }: { emp: Employee, isManager?: b
       </div>
 
       {/* Tooltip Popup */}
-      <div className="absolute top-full mt-2 w-[400px] bg-slate-800 text-white rounded-xl p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 pointer-events-none">
+      <div className="absolute top-full mt-2 w-[420px] bg-slate-800 text-white rounded-xl p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 pointer-events-none">
         <div className="absolute -top-1 left-1/2 -translate-x-1/2 border-solid border-b-slate-800 border-b-[8px] border-x-transparent border-x-[8px] border-t-0"></div>
-        <div className="flex items-start gap-5">
+        <div className="flex items-start gap-4">
           <div className="shrink-0">
             {emp.avatarUrl ? (
-              <img src={emp.avatarUrl} alt={emp.fullName} className="w-28 h-36 rounded-lg object-cover border-2 border-slate-600 shadow-md" referrerPolicy="no-referrer" />
+              <img src={emp.avatarUrl} alt={emp.fullName} className="w-32 h-40 rounded-lg object-cover border border-slate-600 shadow-sm" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-28 h-36 rounded-lg bg-slate-700 flex items-center justify-center border-2 border-slate-600 shadow-md">
+              <div className="w-32 h-40 rounded-lg bg-slate-700 flex items-center justify-center border border-slate-600 shadow-sm">
                 <UserIcon className="w-12 h-12 text-slate-400" />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0 text-left pt-1">
-            <p className="font-bold text-lg border-b border-slate-700 pb-2 mb-2 truncate" title={emp.fullName}>{emp.fullName}</p>
+          <div className="flex-1 min-w-0 text-left pt-0.5">
+            <p className="font-bold text-lg border-b border-slate-700 pb-1.5 mb-2 truncate" title={emp.fullName}>{emp.fullName}</p>
             <div className="space-y-1.5 text-sm text-slate-300">
-              <p className="text-blue-300 font-semibold mb-1 uppercase text-xs tracking-wider">{emp.position || 'Nhân viên'}</p>
+              <p className="text-blue-300 font-semibold mb-0.5 uppercase text-[11px] tracking-wider truncate">{emp.position || 'Nhân viên'}</p>
               <p><span className="font-semibold text-slate-400">Mã NV:</span> {emp.empId}</p>
-              <div className="flex items-center gap-2"><Calendar className="w-4 h-4 shrink-0 text-slate-400"/> <span className="truncate">{emp.dob || '---'}</span></div>
-              <div className="flex items-center gap-2"><Phone className="w-4 h-4 shrink-0 text-slate-400"/> <span className="truncate">{emp.phone || '---'}</span></div>
-              <div className="flex items-center gap-2"><Mail className="w-4 h-4 shrink-0 text-slate-400"/> <span className="truncate">{emp.email || '---'}</span></div>
+              <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400"/> <span className="truncate">{emp.dob || '---'}</span></div>
+              <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 shrink-0 text-slate-400"/> <span className="truncate">{emp.phone || '---'}</span></div>
+              <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 shrink-0 text-slate-400"/> <span className="truncate">{emp.email || '---'}</span></div>
               <p className="pt-2 mt-2 border-t border-slate-700 text-yellow-300 font-medium leading-snug">{emp.dept}</p>
-              {emp.team && emp.team !== emp.dept && <p className="text-slate-400 italic text-xs leading-snug">{emp.team}</p>}
+              {emp.team && emp.team !== emp.dept && <p className="text-slate-400 italic text-[13px] leading-snug">{emp.team}</p>}
             </div>
           </div>
         </div>
