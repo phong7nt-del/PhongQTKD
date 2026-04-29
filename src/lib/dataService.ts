@@ -109,6 +109,59 @@ export function getSafetySubjects(department: string): string[] {
   return allSafetySheets;
 }
 
+export interface Employee {
+  empId: string;
+  fullName: string;
+  avatarUrl: string;
+  dob: string;
+  phone: string;
+  email: string;
+  gender: string;
+  deptShort: string;
+  dept: string;
+  team: string;
+}
+
+export async function getAllEmployees(): Promise<Employee[]> {
+  try {
+    const csv = await fetchCsv('CBCNV');
+    const parsed = Papa.parse<string[]>(csv);
+    const data = parsed.data;
+    if (!data || data.length === 0) return [];
+
+    const employees: Employee[] = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (!row || row.length < 11) continue;
+      
+      const empId = row[1]?.trim();
+      if (!empId) continue;
+      
+      let avatarUrl = row[2]?.trim();
+      if (avatarUrl && !avatarUrl.startsWith('http')) {
+        avatarUrl = ''; // Ignore non-http links
+      }
+      
+      employees.push({
+        empId,
+        avatarUrl,
+        fullName: row[3]?.trim() || '',
+        dob: row[4]?.trim() || '',
+        phone: row[5]?.trim() || '',
+        email: row[6]?.trim() || '',
+        gender: row[7]?.trim() || '',
+        deptShort: row[9]?.trim() || '',
+        dept: row[10]?.trim() || '',
+        team: row[11]?.trim() || ''
+      });
+    }
+    return employees;
+  } catch (err) {
+    console.error('Error fetching all employees:', err);
+    return [];
+  }
+}
+
 export async function getUserInfo(empId: string): Promise<{ fullName?: string; avatarUrl?: string }> {
   try {
     const csv = await fetchCsv('CBCNV');

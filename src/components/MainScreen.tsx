@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import type { User } from '../App';
 import { getStructure, getSafetySubjects } from '../lib/dataService';
-import { BookOpen, LogOut, CheckSquare, Menu, Briefcase, ShieldCheck, AlertTriangle, Edit3, GraduationCap } from 'lucide-react';
+import { BookOpen, LogOut, CheckSquare, Menu, Briefcase, ShieldCheck, AlertTriangle, Edit3, GraduationCap, Users } from 'lucide-react';
 import { StudyScreen } from './StudyScreen';
 import { ExamScreen } from './ExamScreen';
+import { DirectoryScreen } from './DirectoryScreen';
 
 interface MainScreenProps {
   user: User;
@@ -12,7 +13,7 @@ interface MainScreenProps {
 
 export function MainScreen({ user, onLogout }: MainScreenProps) {
   const [activeTab, setActiveTab] = useState<'exam' | 'study'>('exam');
-  const [activeModule, setActiveModule] = useState<'QTKD' | 'QT_AN_TOAN' | 'VI_PHAM'>('QTKD');
+  const [activeModule, setActiveModule] = useState<'QTKD' | 'QT_AN_TOAN' | 'VI_PHAM' | 'DIRECTORY'>('QTKD');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   // We fetch subject map to know what subjects belong to the user's team
@@ -67,6 +68,15 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
               <AlertTriangle className="w-5 h-5 shrink-0" />
               Vi phạm trang bị điện
             </button>
+            {user.empId === '008574' && (
+              <button 
+                onClick={() => setActiveModule('DIRECTORY')}
+                className={`w-full text-left px-3 py-2.5 rounded-md font-medium text-sm transition-colors flex items-center gap-3 ${activeModule === 'DIRECTORY' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-slate-600 hover:bg-slate-50 border-l-4 border-transparent'}`}
+              >
+                <Users className="w-5 h-5 shrink-0" />
+                Danh bạ PCVT
+              </button>
+            )}
           </div>
         </div>
         
@@ -96,36 +106,49 @@ export function MainScreen({ user, onLogout }: MainScreenProps) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
         {/* MAIN NAVIGATION TABS */}
-        <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 shrink-0 flex items-center justify-end gap-3 sm:gap-6 overflow-x-auto no-scrollbar shadow-sm relative">
-           <button 
-             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-             className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-100"
-             title={isSidebarOpen ? "Ẩn danh mục" : "Hiện danh mục"}
-           >
-             <Menu className="w-6 h-6" />
-           </button>
-           
-           <button
-             className={`flex items-center gap-2 px-5 sm:px-10 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base uppercase tracking-wider font-extrabold transition-all duration-200 transform hover:-translate-y-0.5 ${activeTab === 'exam' ? 'bg-blue-600 text-white shadow-[0_4px_0_rgb(29,78,216)] hover:shadow-[0_6px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none' : 'bg-slate-100 text-slate-500 border border-slate-200 shadow-[0_4px_0_rgb(203,213,225)] hover:bg-slate-200 hover:shadow-[0_6px_0_rgb(203,213,225)] active:translate-y-1 active:shadow-none'}`}
-             onClick={() => setActiveTab('exam')}
-           >
-             <Edit3 className="w-5 h-5" />
-             THI THỬ
-           </button>
-           <button
-             className={`flex items-center gap-2 px-5 sm:px-10 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base uppercase tracking-wider font-extrabold transition-all duration-200 transform hover:-translate-y-0.5 ${activeTab === 'study' ? 'bg-blue-600 text-white shadow-[0_4px_0_rgb(29,78,216)] hover:shadow-[0_6px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none' : 'bg-slate-100 text-slate-500 border border-slate-200 shadow-[0_4px_0_rgb(203,213,225)] hover:bg-slate-200 hover:shadow-[0_6px_0_rgb(203,213,225)] active:translate-y-1 active:shadow-none'}`}
-             onClick={() => setActiveTab('study')}
-           >
-             <GraduationCap className="w-5 h-5" />
-             HỌC BÀI
-           </button>
-        </nav>
+        {activeModule !== 'DIRECTORY' && (
+          <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 shrink-0 flex items-center justify-end gap-3 sm:gap-6 overflow-x-auto no-scrollbar shadow-sm relative z-10">
+             <button 
+               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+               className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-100"
+               title={isSidebarOpen ? "Ẩn danh mục" : "Hiện danh mục"}
+             >
+               <Menu className="w-6 h-6" />
+             </button>
+             
+             <button
+               className={`flex items-center gap-2 px-5 sm:px-10 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base uppercase tracking-wider font-extrabold transition-all duration-200 transform hover:-translate-y-0.5 ${activeTab === 'exam' ? 'bg-blue-600 text-white shadow-[0_4px_0_rgb(29,78,216)] hover:shadow-[0_6px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none' : 'bg-slate-100 text-slate-500 border border-slate-200 shadow-[0_4px_0_rgb(203,213,225)] hover:bg-slate-200 hover:shadow-[0_6px_0_rgb(203,213,225)] active:translate-y-1 active:shadow-none'}`}
+               onClick={() => setActiveTab('exam')}
+             >
+               <Edit3 className="w-5 h-5" />
+               THI THỬ
+             </button>
+             <button
+               className={`flex items-center gap-2 px-5 sm:px-10 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base uppercase tracking-wider font-extrabold transition-all duration-200 transform hover:-translate-y-0.5 ${activeTab === 'study' ? 'bg-blue-600 text-white shadow-[0_4px_0_rgb(29,78,216)] hover:shadow-[0_6px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none' : 'bg-slate-100 text-slate-500 border border-slate-200 shadow-[0_4px_0_rgb(203,213,225)] hover:bg-slate-200 hover:shadow-[0_6px_0_rgb(203,213,225)] active:translate-y-1 active:shadow-none'}`}
+               onClick={() => setActiveTab('study')}
+             >
+               <GraduationCap className="w-5 h-5" />
+               HỌC BÀI
+             </button>
+          </nav>
+        )}
 
         {/* Tab Content */}
-        <div className="w-full flex-1 min-h-0 flex flex-col p-2 sm:p-4 lg:p-6 overflow-hidden">
-          {activeModule === 'QTKD' ? (
+        <div className={`w-full flex-1 flex flex-col overflow-hidden ${activeModule === 'DIRECTORY' ? 'p-0' : 'p-2 sm:p-4 lg:p-6'}`}>
+          {activeModule === 'DIRECTORY' ? (
+            <div className="relative flex-1 bg-slate-50 min-h-0 flex flex-col">
+               <button 
+                 onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                 className={`absolute z-20 top-4 left-4 p-2 text-slate-500 bg-white shadow hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-100 ${isSidebarOpen ? 'hidden sm:flex' : 'flex'}`}
+                 title={isSidebarOpen ? "Ẩn danh mục" : "Hiện danh mục"}
+               >
+                 <Menu className="w-6 h-6" />
+               </button>
+               <DirectoryScreen />
+            </div>
+          ) : activeModule === 'QTKD' ? (
             <>
               {activeTab === 'study' && <StudyScreen allSubjects={subjectsInfo.allSubjects} shuffleAnswers={user.shuffleAnswers} />}
               {activeTab === 'exam' && <ExamScreen teamSubjects={subjectsInfo.mySubjects} shuffleAnswers={user.shuffleAnswers} />}
