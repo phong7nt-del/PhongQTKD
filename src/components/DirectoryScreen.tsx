@@ -62,31 +62,27 @@ export function DirectoryScreen() {
     setMovingEmp(null);
 
     // Call Google Apps Script API
-    const scriptUrl = import.meta.env.VITE_APPS_SCRIPT_URL; // Setup in environment
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwh7OrIri-9WwudwGYPxUN1JL50QXSFPgnXGkQRXXBCQcq8ZSgrmRIayK6LI5c-_RLIBA/exec";
+    
     if (scriptUrl) {
       try {
-        const params = new URLSearchParams();
-        params.append('empId', emp.empId);
-        params.append('deptShort', targetDeptShort);
-        params.append('dept', targetDeptName);
-        params.append('team', targetTeam);
-        params.append('position', finalPosition);
-
         await fetch(scriptUrl, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: params.toString()
+          // Không thêm headers Content-Type: application/json để tránh lỗi CORS Preflight
+          // Trình duyệt sẽ tự động gửi dưới dạng text/plain
+          body: JSON.stringify({
+            empId: emp.empId,
+            deptShort: targetDeptShort,
+            dept: targetDeptName,
+            team: targetTeam,
+            position: finalPosition
+          })
         });
-        // Note: mode 'no-cors' always succeeds but response is opaque.
+        console.log("Đã gửi yêu cầu cập nhật Google Sheet");
       } catch (err) {
         console.error("Lỗi cập nhật Google Sheet:", err);
         alert("Có lỗi xảy ra khi cập nhật về Google Sheet.");
       }
-    } else {
-      console.log('Chưa cấu hình VITE_APPS_SCRIPT_URL. Dữ liệu chỉ cập nhật ở giao diện tạm thời.');
     }
   };
 
