@@ -120,6 +120,7 @@ export interface Employee {
   deptShort: string;
   dept: string;
   team: string;
+  position: string;
 }
 
 export async function getAllEmployees(): Promise<Employee[]> {
@@ -152,7 +153,8 @@ export async function getAllEmployees(): Promise<Employee[]> {
         gender: row[7]?.trim() || '',
         deptShort: row[9]?.trim() || '',
         dept: row[10]?.trim() || '',
-        team: row[11]?.trim() || ''
+        team: row[11]?.trim() || '',
+        position: row[12]?.trim() || ''
       });
     }
     return employees;
