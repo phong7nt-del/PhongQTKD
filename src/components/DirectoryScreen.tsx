@@ -96,14 +96,7 @@ export function DirectoryScreen() {
     }).filter(Boolean) as OrgNode[];
   };
 
-  const tree: OrgNode[] = [
-    {
-      id: 'bgd-gd',
-      name: 'Giám đốc',
-      manager: giamDoc,
-      employees: [],
-      children: getDeptTree(gdDepts)
-    },
+  const pgdNodes: OrgNode[] = [
     {
       id: 'bgd-pgdkd',
       name: 'Phó Giám đốc Kinh doanh',
@@ -125,23 +118,35 @@ export function DirectoryScreen() {
       employees: [],
       children: getDeptTree(pgdDtxdDepts)
     }
-  ];
+  ].filter(n => n.manager !== undefined) as OrgNode[];
 
-  if (otherBgd.length > 0) {
-    tree.unshift({
-      id: 'bgd-other',
-      name: 'Ban Giám Đốc Khác',
-      employees: sortEmployees(otherBgd),
-      children: []
-    });
-  }
+  const otherBgdNode: OrgNode[] = otherBgd.length > 0 ? [{
+    id: 'bgd-other',
+    name: 'Ban Giám Đốc Khác',
+    employees: sortEmployees(otherBgd),
+    children: []
+  }] : [];
+
+  const tree: OrgNode[] = [
+    {
+      id: 'bgd-gd',
+      name: 'Giám đốc',
+      manager: giamDoc,
+      employees: [],
+      children: [
+        ...getDeptTree(gdDepts),
+        ...pgdNodes,
+        ...otherBgdNode
+      ]
+    }
+  ];
 
   // Any unmapped departments
   const mappedDepts = new Set([...gdDepts, ...pgdKdDepts, ...pgdKtDepts, ...pgdDtxdDepts, 'BGĐ']);
   const unmappedEmployees = employees.filter(e => !mappedDepts.has(e.deptShort));
   if (unmappedEmployees.length > 0) {
     const unmappedDepts = Array.from(new Set(unmappedEmployees.map(e => e.deptShort)));
-    tree.push({
+    tree[0].children.push({
       id: 'unmapped',
       name: 'Các Phòng/Đội Khác',
       employees: [],
@@ -295,23 +300,42 @@ const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, 
   );
 };
 
-const StyledNode = ({ title, employees, manager }: { title: string, employees: Employee[], manager?: Employee }) => (
-  <div className="inline-flex flex-col items-center mx-2">
-    <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-3 min-w-[220px] max-w-[320px] shadow-sm mb-2 hover:shadow-md transition-shadow">
-      <h4 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2 mb-3 whitespace-normal break-words">{title}</h4>
-      {manager && (
-        <div className="flex flex-col items-center mb-3">
-           <EmployeeCard emp={manager} isManager={true} />
-        </div>
-      )}
-      {employees.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-2 mt-2">
-          {employees.map(e => <EmployeeCard key={e.empId} emp={e} />)}
-        </div>
-      )}
+const StyledNode = ({ title, employees, manager }: { title: string, employees: Employee[], manager?: Employee }) => {
+  const [expanded, setExpanded] = useState(false);
+  
+  const rep = manager || (employees.length > 0 ? employees[0] : undefined);
+  const remainingStaff = manager ? employees : (employees.length > 0 ? employees.slice(1) : []);
+
+  return (
+    <div className="inline-flex flex-col items-center mx-2">
+      <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-3 min-w-[220px] max-w-[320px] shadow-sm mb-2 hover:shadow-md transition-shadow">
+        <h4 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2 mb-3 whitespace-normal break-words">{title}</h4>
+        {rep && (
+          <div className="flex flex-col items-center mb-3">
+             <EmployeeCard emp={rep} isManager={true} />
+          </div>
+        )}
+        {remainingStaff.length > 0 && (
+          <div className="mt-2 w-full flex flex-col items-center">
+            <button 
+              onClick={() => setExpanded(!expanded)}
+              className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors flex items-center justify-center gap-1 w-full"
+            >
+              {expanded ? 'Thu gọn' : `Xem danh sách (${remainingStaff.length})`}
+              {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            </button>
+            
+            {expanded && (
+              <div className="flex flex-wrap justify-center gap-2 mt-4 pt-3 border-t border-slate-200">
+                {remainingStaff.map(e => <EmployeeCard key={e.empId} emp={e} />)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const renderTreeNodes = (nodes: OrgNode[]) => {
   return nodes.map(node => (
