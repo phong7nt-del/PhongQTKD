@@ -57,7 +57,7 @@ export function DirectoryScreen() {
       const getScore = (pos: string) => {
         if (!pos) return 99;
         if (pos.includes('gđ') || pos.includes('giám đốc')) return 1;
-        if (pos.includes('trưởng phòng') || pos.includes('chánh') || pos.includes('đội trưởng') || pos === 'trưởng') return 2;
+        if (pos.includes('trưởng phòng') || pos.includes('chánh') || pos.includes('đội trưởng') || pos === 'trưởng' || pos.includes('kế toán trưởng')) return 2;
         if (pos.includes('phó phòng') || pos.includes('phó chánh') || pos.includes('đội phó') || pos === 'phó') return 3;
         if (pos.includes('tổ trưởng')) return 4;
         if (pos.includes('tổ phó')) return 5;
@@ -76,21 +76,37 @@ export function DirectoryScreen() {
       if (deptEmployees.length === 0) return null;
       
       const deptName = deptEmployees[0].dept;
-      // Trưởng/Phó and direct dept employees
-      const leaders = sortEmployees(deptEmployees.filter(e => e.team === e.dept || e.team === ''));
-      const teams = Array.from(new Set(deptEmployees.filter(e => e.team !== e.dept && e.team !== '').map(e => e.team)));
+      const sortedDeptEmployees = sortEmployees(deptEmployees);
       
+      const isTopLevelLeader = (p: string) => {
+        const ls = p.toLowerCase();
+        return ls.includes('trưởng phòng') || ls.includes('chánh') || ls.includes('đội trưởng') || ls === 'trưởng' || ls.includes('kế toán trưởng') || ls.includes('phụ trách');
+      }
+
+      const manager = sortedDeptEmployees.find(e => isTopLevelLeader(e.position || '')) || sortedDeptEmployees[0];
+      const others = deptEmployees.filter(e => e.empId !== manager?.empId);
+
+      const directStaff = others.filter(e => {
+        const pos = (e.position || '').toLowerCase();
+        return e.team === e.dept || e.team === '' || pos.includes('phó phòng') || pos.includes('phó chánh') || pos.includes('đội phó');
+      });
+      
+      const directStaffIds = new Set(directStaff.map(e => e.empId));
+      const teamEmployees = others.filter(e => !directStaffIds.has(e.empId));
+      const teams = Array.from(new Set(teamEmployees.map(e => e.team)));
+
       const teamNodes: OrgNode[] = teams.map(tName => ({
         id: `team-${code}-${tName}`,
         name: tName,
-        employees: sortEmployees(deptEmployees.filter(e => e.team === tName)),
+        employees: sortEmployees(teamEmployees.filter(e => e.team === tName)),
         children: []
       }));
 
       return {
         id: `dept-${code}`,
         name: deptName,
-        employees: leaders,
+        manager: manager,
+        employees: sortEmployees(directStaff),
         children: teamNodes
       } as OrgNode;
     }).filter(Boolean) as OrgNode[];
@@ -134,7 +150,12 @@ export function DirectoryScreen() {
       manager: giamDoc,
       employees: [],
       children: [
-        ...getDeptTree(gdDepts),
+        {
+          id: 'bgd-khoi-gd',
+          name: 'Các Đơn Vị Trực Thuộc',
+          employees: [],
+          children: getDeptTree(gdDepts)
+        },
         ...pgdNodes,
         ...otherBgdNode
       ]
