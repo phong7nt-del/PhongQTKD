@@ -65,21 +65,22 @@ export function DirectoryScreen() {
     const scriptUrl = import.meta.env.VITE_APPS_SCRIPT_URL; // Setup in environment
     if (scriptUrl) {
       try {
+        const params = new URLSearchParams();
+        params.append('empId', emp.empId);
+        params.append('deptShort', targetDeptShort);
+        params.append('dept', targetDeptName);
+        params.append('team', targetTeam);
+        params.append('position', finalPosition);
+
         await fetch(scriptUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: JSON.stringify({
-            empId: emp.empId,
-            deptShort: targetDeptShort,
-            dept: targetDeptName,
-            team: targetTeam,
-            position: finalPosition
-          })
+          body: params.toString()
         });
-        // Success
+        // Note: mode 'no-cors' always succeeds but response is opaque.
       } catch (err) {
         console.error("Lỗi cập nhật Google Sheet:", err);
         alert("Có lỗi xảy ra khi cập nhật về Google Sheet.");
