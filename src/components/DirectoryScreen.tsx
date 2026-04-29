@@ -45,9 +45,9 @@ export function DirectoryScreen() {
 
   // Map of which deptShort goes to which director
   const gdDepts = ['TCKT', 'VP', 'KHVT', 'TCNS', 'QLĐK']; 
-  const pgdKdDepts = ['KD', 'QLTG', 'DVKH', 'QLHTĐĐ', 'QLĐK'];
-  const pgdKtDepts = ['KTAT', 'VHLĐ', 'QLLĐ', 'QLĐK'];
-  const pgdDtxdDepts = ['QLĐT', 'QLĐK'];
+  const pgdKdDepts = ['KD', 'QLTG', 'DVKH', 'QLHTĐĐ'];
+  const pgdKtDepts = ['KTAT', 'VHLĐ', 'QLLĐ'];
+  const pgdDtxdDepts = ['QLĐT'];
 
   const sortEmployees = (arr: Employee[]) => {
     return [...arr].sort((a, b) => {
