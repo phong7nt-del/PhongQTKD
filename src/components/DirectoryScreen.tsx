@@ -56,13 +56,14 @@ export function DirectoryScreen() {
       
       const getScore = (pos: string) => {
         if (!pos) return 99;
-        if (pos.includes('gđ') || pos.includes('giám đốc')) return 1;
-        if (pos.includes('trưởng phòng') || pos.includes('chánh') || pos.includes('đội trưởng') || pos === 'trưởng' || pos.includes('kế toán trưởng')) return 2;
-        if (pos.includes('phó phòng') || pos.includes('phó chánh') || pos.includes('đội phó') || pos === 'phó') return 3;
-        if (pos.includes('tổ trưởng')) return 4;
-        if (pos.includes('tổ phó')) return 5;
-        if (pos.includes('trưởng') || pos.includes('phụ trách')) return 6;
-        if (pos.includes('phó')) return 7;
+        const ls = pos.toLowerCase();
+        if (ls.includes('gđ') || ls.includes('giám đốc')) return 1;
+        if (ls.includes('phó') && !ls.includes('tổ phó') && !ls.includes('đội phó')) return 3; // phó phòng, phó chánh, ...
+        if (ls.includes('đội phó')) return 3;
+        if (ls.includes('tổ phó')) return 5;
+        if (ls.includes('trưởng phòng') || ls.includes('chánh') || ls.includes('đội trưởng') || ls === 'trưởng' || ls.includes('kế toán trưởng')) return 2;
+        if (ls.includes('tổ trưởng')) return 4;
+        if (ls.includes('trưởng') || ls.includes('phụ trách')) return 6;
         return 10;
       };
       
@@ -80,6 +81,7 @@ export function DirectoryScreen() {
       
       const isTopLevelLeader = (p: string) => {
         const ls = p.toLowerCase();
+        if (ls.includes('phó')) return false;
         return ls.includes('trưởng phòng') || ls.includes('chánh') || ls.includes('đội trưởng') || ls === 'trưởng' || ls.includes('kế toán trưởng') || ls.includes('phụ trách');
       }
 
@@ -152,7 +154,7 @@ export function DirectoryScreen() {
       children: [
         {
           id: 'bgd-khoi-gd',
-          name: 'Các Đơn Vị Trực Thuộc',
+          name: 'Các Phòng Trực Thuộc Giám Đốc',
           employees: [],
           children: getDeptTree(gdDepts)
         },
@@ -361,6 +363,19 @@ const StyledNode = ({ title, employees, manager }: { title: string, employees: E
 const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: number }) => {
   // Hide teams (children of departments) by default
   const [showChildren, setShowChildren] = useState(level < 1 || !node.id.startsWith('dept-'));
+
+  if (node.id === 'bgd-khoi-gd') {
+    return (
+      <TreeNode 
+        key={node.id} 
+        label={<div className="w-0 h-0" />}
+      >
+        {node.children.length > 0 && node.children.map(child => (
+          <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} />
+        ))}
+      </TreeNode>
+    );
+  }
 
   return (
     <TreeNode 
