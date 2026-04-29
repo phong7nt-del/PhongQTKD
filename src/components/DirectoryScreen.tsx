@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllEmployees, Employee } from '../lib/dataService';
-import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown, List, Network } from 'lucide-react';
+import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown, List, Network, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { Tree, TreeNode } from 'react-organizational-chart';
 
 interface OrgNode {
@@ -191,7 +191,7 @@ export function DirectoryScreen() {
             ))}
           </div>
         ) : (
-          <div className="bg-white p-8 pb-[300px] rounded-2xl shadow-sm border border-slate-200 overflow-x-auto no-scrollbar">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
              <OrgChart tree={tree} />
           </div>
         )}
@@ -307,26 +307,26 @@ const StyledNode = ({ title, employees, manager }: { title: string, employees: E
   const remainingStaff = manager ? employees : (employees.length > 0 ? employees.slice(1) : []);
 
   return (
-    <div className="inline-flex flex-col items-center mx-2">
-      <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-3 min-w-[220px] max-w-[320px] shadow-sm mb-2 hover:shadow-md transition-shadow">
-        <h4 className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2 mb-3 whitespace-normal break-words">{title}</h4>
+    <div className="inline-flex flex-col items-center mx-1">
+      <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-2 min-w-[160px] max-w-[240px] shadow-sm mb-1 hover:shadow-md transition-shadow">
+        <h4 className="font-bold text-xs text-slate-800 border-b border-slate-200 pb-1.5 mb-2 whitespace-normal break-words">{title}</h4>
         {rep && (
-          <div className="flex flex-col items-center mb-3">
+          <div className="flex flex-col items-center mb-2">
              <EmployeeCard emp={rep} isManager={true} />
           </div>
         )}
         {remainingStaff.length > 0 && (
-          <div className="mt-2 w-full flex flex-col items-center">
+          <div className="mt-1 w-full flex flex-col items-center">
             <button 
               onClick={() => setExpanded(!expanded)}
-              className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors flex items-center justify-center gap-1 w-full"
+              className="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full hover:bg-blue-100 transition-colors flex items-center justify-center gap-1 w-full"
             >
-              {expanded ? 'Thu gọn' : `Xem danh sách (${remainingStaff.length})`}
-              {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              {expanded ? 'Thu gọn' : `Xem thêm (${remainingStaff.length})`}
+              {expanded ? <ChevronDown className="w-2.5 h-2.5" /> : <ChevronRight className="w-2.5 h-2.5" />}
             </button>
             
             {expanded && (
-              <div className="flex flex-wrap justify-center gap-2 mt-4 pt-3 border-t border-slate-200">
+              <div className="flex flex-wrap justify-center gap-1 mt-2 pt-2 border-t border-slate-200">
                 {remainingStaff.map(e => <EmployeeCard key={e.empId} emp={e} />)}
               </div>
             )}
@@ -337,36 +337,70 @@ const StyledNode = ({ title, employees, manager }: { title: string, employees: E
   );
 };
 
-const renderTreeNodes = (nodes: OrgNode[]) => {
-  return nodes.map(node => (
+const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: number }) => {
+  // Hide teams (children of departments) by default
+  const [showChildren, setShowChildren] = useState(level < 1 || !node.id.startsWith('dept-'));
+
+  return (
     <TreeNode 
       key={node.id} 
-      label={<StyledNode title={node.name} manager={node.manager} employees={node.employees} />}
+      label={
+        <div className="flex flex-col items-center">
+          <StyledNode title={node.name} manager={node.manager} employees={node.employees} />
+          {node.children.length > 0 && (
+            <button 
+              onClick={() => setShowChildren(!showChildren)}
+              className={`mt-1 mb-2 text-[10px] font-bold text-white px-2.5 py-0.5 rounded-full shadow-sm transition-colors z-10 relative ${showChildren ? 'bg-slate-400 hover:bg-slate-500' : 'bg-blue-500 hover:bg-blue-600'} flex items-center gap-1`}
+            >
+              {showChildren ? 'Ẩn cấp dưới' : `Hiện cấp dưới (${node.children.length})`}
+              {showChildren ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            </button>
+          )}
+        </div>
+      }
     >
-      {node.children.length > 0 && renderTreeNodes(node.children)}
+      {showChildren && node.children.length > 0 && node.children.map(child => (
+        <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} />
+      ))}
     </TreeNode>
-  ));
+  );
 };
 
 const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
+  const [zoom, setZoom] = useState(1);
+
   return (
-    <div className="py-4 min-w-max">
-      <Tree
-        lineWidth={'2px'}
-        lineColor={'#cbd5e1'}
-        lineBorderRadius={'10px'}
-        label={
-          <div className="inline-flex flex-col items-center mb-4">
-            <div className="bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-md border-2 border-blue-700 uppercase tracking-widest text-center">
-              Công ty
-              <br/>
-              Điện lực Vũng Tàu
-            </div>
-          </div>
-        }
-      >
-        {renderTreeNodes(tree)}
-      </Tree>
+    <div className="relative w-full h-[600px] flex flex-col">
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-lg shadow-sm border border-slate-200 flex items-center gap-1 z-50 p-1">
+        <button onClick={() => setZoom(z => Math.max(0.3, z - 0.1))} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Thu nhỏ"><ZoomOut className="w-4 h-4"/></button>
+        <span className="text-xs font-medium text-slate-600 w-10 text-center">{Math.round(zoom * 100)}%</span>
+        <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Phóng to"><ZoomIn className="w-4 h-4"/></button>
+        <button onClick={() => setZoom(1)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Khôi phục"><Maximize className="w-4 h-4"/></button>
+      </div>
+
+      <div className="flex-1 overflow-auto no-scrollbar relative w-full h-full cursor-grab active:cursor-grabbing">
+        <div 
+          style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} 
+          className="min-w-max p-8 pb-[300px] transition-transform duration-200 ease-out origin-top flex justify-center"
+        >
+          <Tree
+            lineWidth={'2px'}
+            lineColor={'#cbd5e1'}
+            lineBorderRadius={'10px'}
+            label={
+              <div className="inline-flex flex-col items-center mb-4">
+                <div className="bg-blue-600 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md border-2 border-blue-700 uppercase tracking-widest text-center">
+                  Công ty
+                  <br/>
+                  Điện lực Vũng Tàu
+                </div>
+              </div>
+            }
+          >
+            {tree.map(node => <OrgTreeNodeComponent key={node.id} node={node} level={0} />)}
+          </Tree>
+        </div>
+      </div>
     </div>
   );
 };
