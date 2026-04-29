@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllEmployees, Employee } from '../lib/dataService';
-import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown, List, Network, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { Mail, Phone, Calendar, User as UserIcon, Loader2, ChevronRight, ChevronDown, List, Network, ZoomIn, ZoomOut, Maximize, MoveRight } from 'lucide-react';
 import { Tree, TreeNode } from 'react-organizational-chart';
 
 interface OrgNode {
@@ -15,6 +15,7 @@ export function DirectoryScreen() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
+  const [movingEmp, setMovingEmp] = useState<Employee | null>(null);
 
   useEffect(() => {
     getAllEmployees().then(data => {
@@ -22,6 +23,70 @@ export function DirectoryScreen() {
       setLoading(false);
     });
   }, []);
+
+  const handleMoveEmployee = async (empId: string, destNodeId: string, newPosition?: string) => {
+    const empIndex = employees.findIndex(e => e.empId === empId);
+    if (empIndex === -1) return;
+    
+    let targetDeptShort = '';
+    let targetTeam = '';
+    
+    if (destNodeId.startsWith('dept-')) {
+      targetDeptShort = destNodeId.replace('dept-', '');
+    } else if (destNodeId.startsWith('team-')) {
+      const parts = destNodeId.split('-');
+      targetDeptShort = parts[1];
+      targetTeam = parts.slice(2).join('-');
+    } else if (destNodeId.startsWith('bgd-')) {
+      targetDeptShort = 'BGĐ';
+    } else {
+      return; // Cannot move here
+    }
+
+    const emp = employees[empIndex];
+    // Find full dept name
+    const targetDeptEmp = employees.find(e => e.deptShort === targetDeptShort);
+    const targetDeptName = targetDeptEmp ? targetDeptEmp.dept : targetDeptShort;
+    const finalPosition = newPosition || emp.position;
+
+    const newEmployees = [...employees];
+    newEmployees[empIndex] = {
+      ...emp,
+      deptShort: targetDeptShort,
+      dept: targetDeptName,
+      team: targetTeam,
+      position: finalPosition
+    };
+    
+    setEmployees(newEmployees);
+    setMovingEmp(null);
+
+    // Call Google Apps Script API
+    const scriptUrl = import.meta.env.VITE_APPS_SCRIPT_URL; // Setup in environment
+    if (scriptUrl) {
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          body: JSON.stringify({
+            empId: emp.empId,
+            deptShort: targetDeptShort,
+            dept: targetDeptName,
+            team: targetTeam,
+            position: finalPosition
+          })
+        });
+        // Success
+      } catch (err) {
+        console.error("Lỗi cập nhật Google Sheet:", err);
+        alert("Có lỗi xảy ra khi cập nhật về Google Sheet.");
+      }
+    } else {
+      console.log('Chưa cấu hình VITE_APPS_SCRIPT_URL. Dữ liệu chỉ cập nhật ở giao diện tạm thời.');
+    }
+  };
 
   if (loading) {
     return (
@@ -44,7 +109,7 @@ export function DirectoryScreen() {
   const otherBgd = bgd.filter(e => !['002113', '011903', '004123', '012219'].includes(e.empId));
 
   // Map of which deptShort goes to which director
-  const gdDepts = ['TCKT', 'VP', 'KHVT', 'TCNS', 'QLĐK']; 
+  const gdDepts = ['TCKT', 'VP', 'KHVT', 'TCNS', 'QLĐK', 'CĐ']; 
   const pgdKdDepts = ['KD', 'QLTG', 'DVKH', 'QLHTĐĐ'];
   const pgdKtDepts = ['KTAT', 'VHLĐ', 'QLLĐ'];
   const pgdDtxdDepts = ['QLĐT'];
@@ -177,6 +242,18 @@ export function DirectoryScreen() {
     });
   }
 
+  // Gather nodes for move modal
+  const allDestinations: {id: string, name: string}[] = [];
+  const traverse = (n: OrgNode) => {
+    if (n.id.startsWith('dept-') || n.id.startsWith('team-') || n.id.startsWith('bgd-')) {
+      if (n.id !== 'bgd-khoi-gd') {
+        allDestinations.push({ id: n.id, name: n.name });
+      }
+    }
+    n.children.forEach(traverse);
+  };
+  tree.forEach(traverse);
+
   return (
     <div className="flex-1 w-full bg-slate-50 overflow-y-auto no-scrollbar p-3 sm:p-6">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-8">
@@ -210,30 +287,88 @@ export function DirectoryScreen() {
         {viewMode === 'list' ? (
           <div className="space-y-6">
             {tree.map(node => (
-              <OrgTreeNode key={node.id} node={node} level={0} defaultExpanded={true} />
+              <OrgTreeNode key={node.id} node={node} level={0} defaultExpanded={true} onSelectEmployee={setMovingEmp} />
             ))}
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-             <OrgChart tree={tree} />
+             <OrgChart employees={employees} tree={tree} onMove={handleMoveEmployee} onSelectEmployee={setMovingEmp} />
           </div>
         )}
       </div>
+
+      {movingEmp && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
+              {movingEmp.avatarUrl ? (
+                <img src={movingEmp.avatarUrl} alt={movingEmp.fullName} className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 pointer-events-none" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center border-2 border-slate-200">
+                  <UserIcon className="w-8 h-8 text-slate-400" />
+                </div>
+              )}
+              <div>
+                <h3 className="font-bold text-lg text-slate-800">{movingEmp.fullName}</h3>
+                <p className="text-sm text-slate-500">{movingEmp.position || 'Nhân viên'} • {movingEmp.dept}</p>
+              </div>
+            </div>
+            
+            <div className="p-4 sm:p-6 overflow-y-auto">
+              <h4 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <MoveRight className="w-5 h-5 text-blue-500" />
+                Chọn nơi chuyển đến
+              </h4>
+              <div className="space-y-2">
+                {allDestinations.map(dest => (
+                  <button
+                    key={dest.id}
+                    onClick={() => {
+                      const newPos = prompt(`Nhập chức danh mới cho ${movingEmp.fullName} (Tại ${dest.name}):`, movingEmp.position || 'Nhân viên');
+                      if (newPos !== null) {
+                        handleMoveEmployee(movingEmp.empId, dest.id, newPos);
+                      }
+                    }}
+                    className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <p className="font-medium text-slate-800">{dest.name}</p>
+                    <p className="text-xs text-slate-500 font-mono mt-1">{dest.id.replace('dept-', '').replace('team-', '').replace('bgd-', '')}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 bg-slate-50 mt-auto">
+              <button
+                onClick={() => setMovingEmp(null)}
+                className="w-full py-2.5 rounded-lg font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 transition-colors"
+              >
+                Hủy bỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-const EmployeeCard = ({ emp, isManager = false }: { emp: Employee, isManager?: boolean }) => {
+const EmployeeCard = ({ emp, isManager = false, onSelect, draggable, onDragStart }: { emp: Employee, isManager?: boolean, onSelect?: (emp: Employee) => void, draggable?: boolean, onDragStart?: (e: React.DragEvent) => void }) => {
   return (
-    <div className={`relative group flex flex-col items-center p-3 rounded-xl border transition-all hover:shadow-md cursor-pointer bg-white ${isManager ? 'border-blue-300 shadow-sm' : 'border-slate-200'}`}>
+    <div 
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onClick={() => onSelect?.(emp)}
+      className={`relative group flex flex-col items-center p-3 rounded-xl border transition-all hover:shadow-md cursor-pointer bg-white ${isManager ? 'border-blue-300 shadow-sm' : 'border-slate-200'} ${draggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+    >
       {emp.avatarUrl ? (
-        <img src={emp.avatarUrl} alt={emp.fullName} className="w-16 h-16 rounded-full object-cover border-2 border-slate-100" referrerPolicy="no-referrer" />
+        <img src={emp.avatarUrl} alt={emp.fullName} className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 pointer-events-none" referrerPolicy="no-referrer" />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-slate-200">
+        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-slate-200 pointer-events-none">
           <UserIcon className="w-8 h-8 text-slate-400" />
         </div>
       )}
-      <div className="mt-2 text-center">
+      <div className="mt-2 text-center pointer-events-none">
         <p className={`font-bold text-sm ${isManager ? 'text-blue-800' : 'text-slate-800'}`}>{emp.fullName}</p>
         <p className="text-xs text-slate-500">{emp.empId}</p>
       </div>
@@ -269,7 +404,7 @@ const EmployeeCard = ({ emp, isManager = false }: { emp: Employee, isManager?: b
   );
 };
 
-const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, level: number, defaultExpanded?: boolean }) => {
+const OrgTreeNode = ({ node, level, defaultExpanded = false, onSelectEmployee }: { node: OrgNode, level: number, defaultExpanded?: boolean, onSelectEmployee?: (emp: Employee) => void }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const hasContent = node.employees.length > 0 || (node.manager !== undefined) || node.children.length > 0;
   
@@ -301,9 +436,9 @@ const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, 
             <div className="mb-6">
               <h4 className="text-xs uppercase font-bold text-slate-400 mb-3 tracking-widest pl-2">Nhân sự trực thuộc</h4>
               <div className="flex flex-wrap gap-4 pl-2">
-                {node.manager && <EmployeeCard emp={node.manager} isManager={true} />}
+                {node.manager && <EmployeeCard emp={node.manager} isManager={true} onSelect={onSelectEmployee} />}
                 {node.employees.map(emp => (
-                  <EmployeeCard key={emp.empId} emp={emp} isManager={level > 1 && node.employees.length <= 3} />
+                  <EmployeeCard key={emp.empId} emp={emp} isManager={level > 1 && node.employees.length <= 3} onSelect={onSelectEmployee} />
                 ))}
               </div>
             </div>
@@ -313,7 +448,7 @@ const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, 
           {node.children.length > 0 && (
             <div className={`space-y-4 ${level === 0 ? 'pl-4 sm:pl-8 border-l-2 border-slate-100 ml-4' : 'pl-2'}`}>
               {node.children.map(child => (
-                <OrgTreeNode key={child.id} node={child} level={level + 1} />
+                <OrgTreeNode key={child.id} node={child} level={level + 1} onSelectEmployee={onSelectEmployee} />
               ))}
             </div>
           )}
@@ -323,19 +458,54 @@ const OrgTreeNode = ({ node, level, defaultExpanded = false }: { node: OrgNode, 
   );
 };
 
-const StyledNode = ({ title, employees, manager }: { title: string, employees: Employee[], manager?: Employee }) => {
+const StyledNode = ({ title, employees, manager, nodeId, onMove, onSelectEmployee }: { title: string, employees: Employee[], manager?: Employee, nodeId: string, onMove?: (empId: string, destId: string, newPos?: string) => void, onSelectEmployee?: (emp: Employee) => void }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   
   const rep = manager || (employees.length > 0 ? employees[0] : undefined);
   const remainingStaff = manager ? employees : (employees.length > 0 ? employees.slice(1) : []);
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const empId = e.dataTransfer.getData('empId');
+    if (empId && onMove) {
+      // NOTE: Moving down a few levels, the prompt call is handled by the parent Tree so it knows the employee.
+      // But we can trigger it here if we pass a callback, wait, parent passes `onMove` that takes 3 args.
+      // But we don't have the employee object here exactly. Let's just pass null for newPos, and parent will handle it if needed?
+      // Wait, we need to prompt for position. If we just call onMove, parent DirectoryScreen handles the rest? No, DirectoryScreen's handleMoveEmployee takes 3 args.
+      // We can just call onMove(empId, nodeId) and let parent handle the prompt. 
+      onMove(empId, nodeId);
+    }
+  };
+
   return (
-    <div className="inline-flex flex-col items-center mx-1">
-      <div className="bg-slate-50 border-t-4 border-t-blue-500 border border-slate-200 rounded-xl p-2 min-w-[160px] max-w-[240px] shadow-sm mb-1 hover:shadow-md transition-shadow">
+    <div 
+      className="inline-flex flex-col items-center mx-1 relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div className={`bg-slate-50 border-t-4 ${isDragOver ? 'border-t-green-500 bg-green-50 scale-105' : 'border-t-blue-500'} border border-slate-200 rounded-xl p-2 min-w-[160px] max-w-[240px] shadow-sm mb-1 hover:shadow-md transition-all duration-200 group/node`}>
         <h4 className="font-bold text-xs text-slate-800 border-b border-slate-200 pb-1.5 mb-2 whitespace-normal break-words">{title}</h4>
         {rep && (
           <div className="flex flex-col items-center mb-2">
-             <EmployeeCard emp={rep} isManager={true} />
+             <EmployeeCard 
+                emp={rep} 
+                isManager={true} 
+                draggable={true} 
+                onDragStart={(e) => { e.dataTransfer.setData('empId', rep.empId); e.stopPropagation(); }} 
+                onSelect={onSelectEmployee}
+             />
           </div>
         )}
         {remainingStaff.length > 0 && (
@@ -350,9 +520,22 @@ const StyledNode = ({ title, employees, manager }: { title: string, employees: E
             
             {expanded && (
               <div className="flex flex-wrap justify-center gap-1 mt-2 pt-2 border-t border-slate-200">
-                {remainingStaff.map(e => <EmployeeCard key={e.empId} emp={e} />)}
+                {remainingStaff.map(e => (
+                  <EmployeeCard 
+                    key={e.empId} 
+                    emp={e} 
+                    draggable={true} 
+                    onDragStart={(evt) => { evt.dataTransfer.setData('empId', e.empId); evt.stopPropagation(); }} 
+                    onSelect={onSelectEmployee}
+                  />
+                ))}
               </div>
             )}
+          </div>
+        )}
+        {isDragOver && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-lg z-50 animate-bounce pointer-events-none whitespace-nowrap">
+            Thả để chuyển
           </div>
         )}
       </div>
@@ -360,7 +543,7 @@ const StyledNode = ({ title, employees, manager }: { title: string, employees: E
   );
 };
 
-const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: number }) => {
+const OrgTreeNodeComponent = ({ node, level = 0, onMove, onSelectEmployee }: { node: OrgNode, level?: number, onMove?: (empId: string, destId: string) => void, onSelectEmployee?: (emp: Employee) => void }) => {
   // Hide teams (children of departments) by default
   const [showChildren, setShowChildren] = useState(level < 1 || !node.id.startsWith('dept-'));
 
@@ -371,7 +554,7 @@ const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: numb
         label={<div className="w-0 h-0" />}
       >
         {node.children.length > 0 && node.children.map(child => (
-          <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} />
+          <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} onMove={onMove} onSelectEmployee={onSelectEmployee} />
         ))}
       </TreeNode>
     );
@@ -382,7 +565,7 @@ const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: numb
       key={node.id} 
       label={
         <div className="flex flex-col items-center">
-          <StyledNode title={node.name} manager={node.manager} employees={node.employees} />
+          <StyledNode title={node.name} manager={node.manager} employees={node.employees} nodeId={node.id} onMove={onMove} onSelectEmployee={onSelectEmployee} />
           {node.children.length > 0 && (
             <button 
               onClick={() => setShowChildren(!showChildren)}
@@ -396,14 +579,24 @@ const OrgTreeNodeComponent = ({ node, level = 0 }: { node: OrgNode, level?: numb
       }
     >
       {showChildren && node.children.length > 0 && node.children.map(child => (
-        <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} />
+        <OrgTreeNodeComponent key={child.id} node={child} level={level + 1} onMove={onMove} onSelectEmployee={onSelectEmployee} />
       ))}
     </TreeNode>
   );
 };
 
-const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
+const OrgChart = ({ tree, employees, onMove, onSelectEmployee }: { tree: OrgNode[], employees: Employee[], onMove?: (empId: string, destId: string, pos?: string) => void, onSelectEmployee?: (emp: Employee) => void }) => {
   const [zoom, setZoom] = useState(1);
+
+  // We wrap the onMove callback to prompt for the position if dragged and dropped successfully
+  const handleDropWithPrompt = (empId: string, destId: string) => {
+    const movingEmp = employees.find(e => e.empId === empId);
+    if (!movingEmp) return;
+    const newPos = prompt(`Nhập chức danh mới cho nhân sự ${movingEmp.fullName}:`, movingEmp.position || 'Nhân viên');
+    if (newPos !== null) {
+      onMove?.(empId, destId, newPos);
+    }
+  };
 
   return (
     <div className="relative w-full h-[70vh] sm:h-[600px] flex flex-col">
@@ -414,7 +607,9 @@ const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
         <button onClick={() => setZoom(1)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded" title="Khôi phục"><Maximize className="w-4 h-4"/></button>
       </div>
 
-      <div className="flex-1 overflow-auto no-scrollbar relative w-full h-full cursor-grab active:cursor-grabbing">
+      <div 
+        className={`flex-1 overflow-auto no-scrollbar relative w-full h-full cursor-grab active:cursor-grabbing`}
+      >
         <div 
           style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} 
           className="min-w-max p-8 pb-[300px] transition-transform duration-200 ease-out origin-top flex justify-center"
@@ -424,7 +619,16 @@ const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
             lineColor={'#cbd5e1'}
             lineBorderRadius={'10px'}
             label={
-              <div className="inline-flex flex-col items-center mb-4">
+              <div 
+                className="inline-flex flex-col items-center mb-4"
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const empId = e.dataTransfer.getData('empId');
+                  if (empId) handleDropWithPrompt(empId, 'bgd-gd');
+                }}
+              >
                 <div className="bg-blue-600 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md border-2 border-blue-700 uppercase tracking-widest text-center">
                   Công ty
                   <br/>
@@ -433,7 +637,7 @@ const OrgChart = ({ tree }: { tree: OrgNode[] }) => {
               </div>
             }
           >
-            {tree.map(node => <OrgTreeNodeComponent key={node.id} node={node} level={0} />)}
+            {tree.map(node => <OrgTreeNodeComponent key={node.id} node={node} level={0} onMove={handleDropWithPrompt} onSelectEmployee={onSelectEmployee} />)}
           </Tree>
         </div>
       </div>
